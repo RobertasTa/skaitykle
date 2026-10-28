@@ -1,0 +1,17 @@
+# PyInstaller ir Inno Setup rezultatai - keliauja i Release, ne i git
+dist/
+build/
+_pyinstaller.log
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Balsu modeliai - po 63,5 MB; BUILD.md sako, is kur ir su kokia SHA256
+*.onnx
+
+# Vidiniai: darbo pasas, kurejo paleidiklis, ikonos irankis (irankiai lieka pas mus)
+PASAS.md
+paleisti.cmd
+_ikona/
