@@ -50,6 +50,12 @@
   .padekos p+p{margin-top:12px}
   footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
   footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+  .kita{display:flex;gap:20px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .kita img{width:80px;height:80px;flex:none;display:block}
+  .kita h3{font-size:1.15rem;margin-bottom:6px}
+  .kita p{color:var(--muted);font-size:.95rem}
+  .kita .actions{justify-content:flex-start;margin:16px 0 0}
+  @media (max-width:520px){.kita{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -139,6 +145,21 @@
   <div class="ask">
     <p><b>Ne programuotojas?</b> Programoje spausk <b>„?“ → „Neradote atsakymo? Klauskite DI“</b> — atsidarys pokalbis su asistentu, kuris jau bus gavęs autoriaus instruktažą apie šią programą. Klausk savo žodžiais, lietuviškai.</p>
     <p>Arba įklijuok į bet kurį DI pokalbį: <code>Perskaityk https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONSULTANT_BRIEF.md ir padėk man su Skaitykle.</code></p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Kita mūsų dovana — Diktuoklė</h2>
+  <div class="kita">
+    <a href="https://robertasta.github.io/diktuokle/"><img src="diktuokle_ikona.png" alt="Diktuoklės ikona — mikrofonas ir dokumentas"></a>
+    <div>
+      <h3>Diktuoklė — lietuviškas diktavimas balsu</h3>
+      <p>Skaityklė tekstą paverčia balsu, Diktuoklė — atvirkščiai: laikai Ctrl, kalbi lietuviškai, ir tekstas atsiranda bet kurioje programoje — Word, naršyklėje, laiške. Irgi be interneto ir nemokamai.</p>
+      <div class="actions">
+        <a class="btn btn-amber" href="https://robertasta.github.io/diktuokle/">Apie Diktuoklę</a>
+        <a class="btn btn-ghost" href="https://github.com/RobertasTa/diktuokle/releases/latest">Parsisiųsti</a>
+      </div>
+    </div>
   </div>
 </section>
 

@@ -77,6 +77,10 @@ Abu balsai paskelbti oficialiame Piper balsų kataloge; programoje — tie patys
 
 Programa — **GPL v3** (žr. [LICENSE](LICENSE)). Naudoti, keisti sau ir dalintis — laisvai; dalinant pakeistą versiją, ji turi likti tokia pat laisva. Kitų komponentų licencijos — [THIRD_PARTY.md](THIRD_PARTY.md). Kaip pasistatyti pačiam — [BUILD.md](BUILD.md).
 
+## Kita mūsų dovana — Diktuoklė
+
+Skaityklė tekstą paverčia balsu, **[Diktuoklė](https://robertasta.github.io/diktuokle/)** — atvirkščiai: laikai Ctrl, kalbi lietuviškai, ir tekstas atsiranda bet kurioje programoje — Word, naršyklėje, laiške. Irgi be interneto ir nemokamai. **[Apie Diktuoklę](https://robertasta.github.io/diktuokle/)** · [Parsisiųsti](https://github.com/RobertasTa/diktuokle/releases/latest)
+
 ## Ačiū
 
 [Piper](https://github.com/OHF-Voice/piper1-gpl) ir Michaelui Hansenui — už variklį ir balsų katalogą; LIEPA garsyno kūrėjams; Spotify — už [pedalboard](https://github.com/spotify/pedalboard) (ekvalaizeris ir mp3 skaitymas); espeak-ng, Qt / PyQt6, ONNX Runtime, libsndfile ir LAME kūrėjams.
