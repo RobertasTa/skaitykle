@@ -26,13 +26,13 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 - **Greičio slankiklis** — lėčiau ar greičiau, kaip tau patogu; ↺ grąžina balso numatytąjį tempą.
 - **Iš failo arba iš lango** — .txt failas (tinka ir senas Windows kodavimas) arba įklijuotas / įrašytas tekstas.
 - **Tarimo žodynėlis** — „kaip parašyta → kaip turi skambėti" terminams ir pavardėms, su perklausa.
-- **Ekvalaizeris** (⚙) — septynios juostos nuo žemų iki aukštų, garsumas ir pauzė tarp pastraipų sekundėmis. Slankiklius gali judinti klausydamasis — garsas keičiasi iš karto.
+- **Ekvalaizeris** (⚙) — septynios juostos nuo žemų iki aukštų, garsumas ir pauzė tarp pastraipų sekundėmis. Slankiklius gali judinti klausydamasis — garsas keičiasi iš karto. Ten pat ir greitis: pajudinus jį grojant, pavyzdys persidaro nauju greičiu.
 - **Pažymėk teksto gabalą ir spausk ▸** — išgirsi tik jį.
 - **Skaičiai ir santrumpos** paverčiami žodžiais (datos kol kas skaitomos kaip paprasti skaičiai — žr. „Ribos").
 
 ## Parsisiųsti
 
-**[Skaitykle-0.1.0-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — apie 190 MB, Windows 10/11 (64 bitų). Diegiasi į tavo profilį, administratoriaus teisių nereikia. Balsai jau viduje — nieko papildomai siųstis nereikia.
+**[Skaitykle-0.1.1-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — apie 190 MB, Windows 10/11 (64 bitų). Diegiasi į tavo profilį, administratoriaus teisių nereikia. Balsai jau viduje — nieko papildomai siųstis nereikia.
 
 ⚠️ **Windows parodys mėlyną langą „Windows protected your PC" / „Windows apsaugojo jūsų kompiuterį".** Tai ne virusas — programa neturi mokamo kodo parašo, todėl SmartScreen nepažįsta leidėjo. Spausk **„Daugiau informacijos" → „Vis tiek vykdyti"**. Jei nori įsitikinti, kad failas tas pats, kurį paskelbėm, jo sha256 suma yra Release puslapyje.
 

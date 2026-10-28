@@ -63,7 +63,7 @@ from dantratis import GarsoNustatymai
 from tarimas import TarimoZodynas
 
 PAVADINIMAS = 'Skaityklė'
-VERSIJA = '0.1'
+VERSIJA = '0.1.1'
 # Ikona — PROGRAMOS kataloge (pakete `_internal\`), ne `build\`: iš ten ji į exe nepatektų.
 # Roberto GPT paveikslas, kampai iškirpti `_ikona\kirpk_kvadrata.py` (spindulys pagal įstrižainę).
 IKONA = os.path.join(CIA, 'Skaitykle.ico')
@@ -559,6 +559,13 @@ class Langas(QWidget):
         self._laikmatis.setInterval(200)
         self._laikmatis.timeout.connect(self._ar_dar_groja)
         self.greitis.valueChanged.connect(lambda _v: self._atnaujink_info())
+        # Greitis keičia patį balso darymą, ne paruoštą garsą — grojamą pavyzdį tenka padaryti iš
+        # naujo. Laukiam 0,6 s po paskutinio judesio, kad tempiant slankiklį nedarytume kas žingsnį.
+        self._perdaryk_laikmatis = QTimer(self)
+        self._perdaryk_laikmatis.setSingleShot(True)
+        self._perdaryk_laikmatis.setInterval(600)
+        self._perdaryk_laikmatis.timeout.connect(self._perdaryk_pavyzdi)
+        self.greitis.valueChanged.connect(self._greitis_visur)
 
         # Režimas — iš nustatymų; pirmą kartą „Iš failo" (Roberto pradinis užsakymas).
         (self.r_langas if n.get('rezimas') == 'langas' else self.r_failas).setChecked(True)
@@ -580,6 +587,24 @@ class Langas(QWidget):
 
     def _greitis_pakeistas(self, v):
         self.greitis_zyme.setText(('%.2f×' % (v / 100.0)).replace('.', ','))
+
+    def _greitis_visur(self, v):
+        """Pagrindinio lango slankiklis — vienintelė greičio tiesa; dantratis rodo tą patį."""
+        if self._dialogas is not None:
+            self._dialogas.nustatyk_greiti(v)
+        if self._grojimas is not None and self._grojimas.is_alive():
+            self._perdaryk_laikmatis.start()
+
+    def _perdaryk_pavyzdi(self):
+        """Grojamas PAVYZDYS (▸ ar dantračio „Pasiklausyti") persidaro nauju greičiu. Failo
+        perklausa neliečiama — failas jau padarytas, jo greitis nepasikeis."""
+        m = self._grojimo_mygtukas
+        if (m is None or not (self._grojimas is not None and self._grojimas.is_alive())
+                or (m is not self.b_pavyzdys
+                    and not (self._dialogas is not None and m is self._dialogas.b_klausyti))):
+            return
+        self._stabdyk_groti()
+        self._pavyzdys_paspaustas(m)
 
     # ---- iš kur tekstas ---------------------------------------------------------------
     def is_failo(self):
@@ -686,10 +711,13 @@ class Langas(QWidget):
         # Vienas langas visam programos gyvenimui: jis pats laiko savo reikšmes, o mygtukas,
         # kurį grotuvas perjunginėja, niekada neišnyksta po kojomis.
         if self._dialogas is None:
-            self._dialogas = GarsoNustatymai(self, self._eq, self._garsumas, self._pauze)
+            self._dialogas = GarsoNustatymai(self, self._eq, self._garsumas, self._pauze,
+                                             self.greitis.value())
             self._dialogas.pakeista.connect(self._nustatymai_pakeisti)
             self._dialogas.klausyti.connect(
                 lambda: self._pavyzdys_paspaustas(self._dialogas.b_klausyti))
+            self._dialogas.greitis_pakeistas.connect(self.greitis.setValue)
+        self._dialogas.nustatyk_greiti(self.greitis.value())
         self._dialogas.exec()
         self._stabdyk_groti()
         self._issaugok_nustatymus()

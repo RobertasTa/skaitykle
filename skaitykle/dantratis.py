@@ -8,6 +8,11 @@ taip derina muzikantai: klausaisi ir suki.
 Langas pats garso negroja ir nieko nesaugo: jis tik praneša apie pokyčius (`pakeista`) ir
 paprašo perklausos (`klausyti`) — groja ir saugo pagrindinis langas, kad grojimo kelias būtų
 vienas (SpeakDream pamoka: du tiesos šaltiniai tam pačiam = defektas).
+
+Greitis čia — ANTRAS to paties slankiklio vaizdas (Roberto 10-28: „derinant patogu ir greitį
+nusistatyti"). Tiesa viena — pagrindinio lango slankiklis: šis tik praneša `greitis_pakeistas`, o
+pagrindinis langas grąžina reikšmę per `nustatyk_greiti` (be signalo — kad nesusisuktų ratu).
+Greitis keičia patį balso darymą, ne paruoštą garsą, todėl grojant pavyzdys persidaro (main.py).
 """
 from functools import partial
 
@@ -21,8 +26,9 @@ import garsas
 class GarsoNustatymai(QDialog):
     pakeista = pyqtSignal()
     klausyti = pyqtSignal()
+    greitis_pakeistas = pyqtSignal(int)
 
-    def __init__(self, tevas, eq, garsumas, pauze):
+    def __init__(self, tevas, eq, garsumas, pauze, greitis=100):
         super().__init__(tevas)
         self.setWindowTitle('Garso nustatymai')
         self.setStyleSheet(tevas.styleSheet())
@@ -84,14 +90,35 @@ class GarsoNustatymai(QDialog):
         self.pauze.valueChanged.connect(self._pauze_pakeista)
         self._rodyk_pauze()
 
+        # Tas pats diapazonas kaip pagrindiniame lange (60–140 = 0,60–1,40×).
+        self.greitis = QSlider(Qt.Orientation.Horizontal)
+        self.greitis.setRange(60, 140)
+        self.greitis.setSingleStep(5)
+        self.greitis.setPageStep(10)
+        self.greitis.setValue(int(greitis))
+        self.greitis.setToolTip('Kalbėjimo greitis — tas pats, kas pagrindiniame lange. Grojant '
+                                'pavyzdys persidaro nauju greičiu.')
+        self.greicio_zyme = QLabel()
+        self.greitis.valueChanged.connect(self._greitis_judintas)
+        self._rodyk_greiti()
+        b_numatytas = QPushButton('↺')
+        b_numatytas.setObjectName('ikona')
+        b_numatytas.setToolTip('Balso numatytasis greitis (1,00×)')
+        b_numatytas.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        b_numatytas.clicked.connect(lambda: self.greitis.setValue(100))
+
         kiti = QGridLayout()
         kiti.setHorizontalSpacing(10)
-        kiti.addWidget(QLabel('Garsumas'), 0, 0)
-        kiti.addWidget(self.garsumas, 0, 1)
-        kiti.addWidget(self.garsumo_zyme, 0, 2)
-        kiti.addWidget(QLabel('Pauzė tarp pastraipų'), 1, 0)
-        kiti.addWidget(self.pauze, 1, 1)
-        kiti.addWidget(self.pauzes_zyme, 1, 2)
+        kiti.addWidget(QLabel('Greitis'), 0, 0)
+        kiti.addWidget(self.greitis, 0, 1)
+        kiti.addWidget(self.greicio_zyme, 0, 2)
+        kiti.addWidget(b_numatytas, 0, 3)
+        kiti.addWidget(QLabel('Garsumas'), 1, 0)
+        kiti.addWidget(self.garsumas, 1, 1)
+        kiti.addWidget(self.garsumo_zyme, 1, 2)
+        kiti.addWidget(QLabel('Pauzė tarp pastraipų'), 2, 0)
+        kiti.addWidget(self.pauze, 2, 1)
+        kiti.addWidget(self.pauzes_zyme, 2, 2)
         kiti.setColumnStretch(1, 1)
 
         self.b_klausyti = QPushButton('▶  Pasiklausyti')
@@ -130,6 +157,20 @@ class GarsoNustatymai(QDialog):
 
     def pauzes_s(self):
         return self.pauze.value() / 10.0
+
+    def nustatyk_greiti(self, v):
+        """Pagrindinis langas grąžina savo reikšmę — be signalo, kad nesusisuktų ratu."""
+        self.greitis.blockSignals(True)
+        self.greitis.setValue(int(v))
+        self.greitis.blockSignals(False)
+        self._rodyk_greiti()
+
+    def _rodyk_greiti(self):
+        self.greicio_zyme.setText(('%.2f×' % (self.greitis.value() / 100.0)).replace('.', ','))
+
+    def _greitis_judintas(self, v):
+        self._rodyk_greiti()
+        self.greitis_pakeistas.emit(v)
 
     def rodyk_grojima(self, groja):
         self.b_klausyti.setText('■  Sustabdyti' if groja else '▶  Pasiklausyti')

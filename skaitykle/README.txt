@@ -56,6 +56,10 @@ KAIP NAUDOTI
 GARSO NUSTATYMAI (⚙)
 --------------------
 
+Greitis — tas pats slankiklis kaip pagrindiniame lange, kad derinant būtų
+po ranka (pakeitus viename — keičiasi ir kitame). Pajudinus jį grojant,
+pavyzdys po akimirkos persidaro ir groja nauju greičiu.
+
 Ekvalaizeris — septynios juostos nuo žemų (125 Hz) iki aukštų (8 kHz).
 Užveskite pelę ant juostos vardo — pamatysite, už ką ji atsakinga.
 Spauskite „Pasiklausyti" ir judinkite slankiklius: garsas keičiasi iš karto.

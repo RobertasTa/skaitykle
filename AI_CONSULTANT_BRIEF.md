@@ -80,7 +80,10 @@ settings they need and a speed slider.
   2, 4, 8 kHz; ±12 dB each, one octave wide), overall volume (−12…+12 dB,
   default **+6 dB**), pause between paragraphs in seconds (0–5 s, default
   **1.3 s**). "Pasiklausyti" plays a sample, and the sliders take effect while
-  it plays. The voices are 22 050 Hz audio — there is nothing above ~11 kHz to
+  it plays. Since 0.1.1 the **speed** slider is duplicated here (it is the same
+  setting as in the main window — moving one moves the other); speed changes
+  the synthesis itself, so while a sample plays it is remade at the new speed
+  about half a second after the slider stops. The voices are 22 050 Hz audio — there is nothing above ~11 kHz to
   adjust, which is why the top band is 8 kHz.
 - **Loudness, measured:** without the +6 dB default the files are about −24
   LUFS; with it about −18 LUFS. The loudest moments are kept from clipping by a

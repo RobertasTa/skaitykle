@@ -2,7 +2,7 @@
 ;
 ; STATYTI PER POWERSHELL, ne per Git Bash (MSYS argumenta "/O..." pavercia keliu):
 ;   & "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" "/O$env:TEMP\skaitykle_setup" Skaitykle.iss
-;   Move-Item "$env:TEMP\skaitykle_setup\Skaitykle-0.1.0-setup.exe" ..\dist\
+;   Move-Item "$env:TEMP\skaitykle_setup\Skaitykle-<versija>-setup.exe" ..\dist\
 ; ⛔ Inno Setup i D: diska rasyti NEGALI ("output file appears to be in use (32)") -
 ;   seimos pamoka 2026-09-19.
 ; ⛔ Failas UTF-8 SU BOM (AppName turi lietuviska raide) - guard Rule 6.
@@ -19,7 +19,7 @@
 
 #define AppName      "Skaityklė"
 #define AppDirName   "Skaitykle"
-#define AppVersion   "0.1.0"
+#define AppVersion   "0.1.1"
 #define AppExeName   "Skaitykle.exe"
 #define AppUrl       "https://github.com/RobertasTa/skaitykle"
 

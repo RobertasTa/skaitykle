@@ -24,13 +24,13 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 - **Speed slider**, ↺ back to the voice's own rate.
 - **From a file or from the window** — a .txt file (old Windows encodings too) or pasted / typed text.
 - **Pronunciation list** — *written → spoken* for terms and names, with preview.
-- **Equaliser** (⚙) — seven bands, volume and the pause between paragraphs in seconds; the sliders work while the sample plays.
+- **Equaliser** (⚙) — seven bands, volume and the pause between paragraphs in seconds; the sliders work while the sample plays. The speed slider is there too: move it while the sample plays and the sample is remade at the new speed.
 - **Select a piece of text and press ▸** to hear just that.
 - **Numbers and abbreviations** are expanded into words (dates are still read as plain numbers — see "Limits").
 
 ## Download
 
-**[Skaitykle-0.1.0-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — about 190 MB, Windows 10/11 (64-bit). Installs into your user profile, no administrator rights. The voices are inside — nothing else to download.
+**[Skaitykle-0.1.1-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — about 190 MB, Windows 10/11 (64-bit). Installs into your user profile, no administrator rights. The voices are inside — nothing else to download.
 
 ⚠️ **Windows will show a blue "Windows protected your PC" screen.** It is not malware: the installer has no paid code-signing certificate, so SmartScreen does not know the publisher. Click **"More info" → "Run anyway"**. The sha256 of the file is on the Release page.
 
