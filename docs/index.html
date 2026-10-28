@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="ngCuEME8a9C8od6O7mw1EHMId6BzZqJE9-xi-NIyy-Y" />
+<title>Skaityklė — tekstas į mp3 lietuvišku balsu, be interneto</title>
+<meta name="description" content="Nemokama atviro kodo programa Windows: įklijuok tekstą arba atidaryk .txt failą — gauk mp3, perskaitytą lietuvišku balsu (Ingutė arba Reginutė). Greitis, ekvalaizeris, tarimo žodynėlis. Viskas tavo kompiuteryje. Lithuanian offline text-to-speech to MP3 for Windows.">
+<meta property="og:title" content="Skaityklė — tekstas į mp3 lietuvišku balsu">
+<meta property="og:description" content="Įklijuok tekstą arba atidaryk .txt — gauk mp3. Lietuviškai, tavo kompiuteryje, nemokamai.">
+<meta property="og:image" content="https://robertasta.github.io/skaitykle/banner.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="lt_LT">
+<link rel="canonical" href="https://robertasta.github.io/skaitykle/">
+<style>
+  :root{
+    --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
+    --text:#f5f7fc; --muted:#bcc4d6; --amber:#e8b84b; --line:#1d3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--amber)}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  header{padding:32px 0 36px;text-align:center}
+  header img.hero{width:100%;max-width:820px;border-radius:10px;border:1px solid var(--line);margin-bottom:26px}
+  h1{font-size:2.4rem;font-weight:700;letter-spacing:.5px}
+  .tagline{font-size:1.25rem;color:var(--muted);margin-top:10px}
+  .amber{color:var(--amber);font-style:italic;margin-top:8px}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 8px}
+  .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-amber{background:var(--amber);color:#1a1200}
+  .btn-ghost{border:1px solid var(--line);color:var(--text)}
+  .lang{color:var(--muted);font-size:.92rem;margin-top:14px}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{font-size:1.02rem;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:.95rem}
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}
+  .shots img{width:100%;border-radius:8px;border:1px solid var(--line)}
+  .ask{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px}
+  .ask p{color:var(--muted)}
+  .ask p+p{margin-top:12px}
+  code{overflow-wrap:anywhere;font-family:Consolas,"Courier New",monospace;background:#00081a;padding:2px 6px;border-radius:4px}
+  .zyma{color:var(--muted);font-size:.95rem;border-left:3px solid var(--amber);padding-left:14px;margin-top:18px}
+  ol,ul{padding-left:22px;color:var(--muted)}
+  li+li{margin-top:6px}
+  .padekos p{color:var(--muted);font-size:.95rem}
+  .padekos p+p{margin-top:12px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+  footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <img class="hero" src="banner.png" alt="Robotinė ranka laiko dovanų dėžutę su dokumento ir garso bangų ženklu; šalia užrašas „Skaityklė — Lithuanian text to MP3, read aloud. Synthetic voices, fully offline.“ (iliustracija sukurta naudojant DI)">
+  <h1>Skaityklė</h1>
+  <p class="tagline">Tekstas į mp3 lietuvišku balsu.</p>
+  <p class="amber">Įklijuok tekstą arba atidaryk .txt failą — gauk mp3. Tavo kompiuteryje, nemokamai, be interneto.</p>
+  <div class="actions">
+    <a class="btn btn-amber" href="https://github.com/RobertasTa/skaitykle/releases/latest">Parsisiųsti Windows</a>
+    <a class="btn btn-ghost" href="https://github.com/RobertasTa/skaitykle">Kodas GitHub'e</a>
+  </div>
+  <p class="lang">In English: <a href="https://github.com/RobertasTa/skaitykle/blob/main/README_EN.md">README_EN.md</a></p>
+  <p class="zyma" style="text-align:left">Sukurta naudojant DI: programos kodą rašė Claude (Anthropic) kartu su Robertu, ikona sukurta DI. Įgarsinti įrašai yra <b>sintetiniai</b> — mp3 faile tai pažymėta žyma.</p>
+</header>
+
+<section class="wrap">
+  <h2>Kam tai</h2>
+  <div class="grid">
+    <div class="card"><h3>Dėstytojams ir mokytojams</h3><p>Įgarsinti skaidrių komentarus. Eilutė <code>---</code> tekste padalija įrašą į kelis mp3: po failą kiekvienai skaidrei.</p></div>
+    <div class="card"><h3>Visai knygai</h3><p>Atidaryk .txt failą — programa parodys, kiek maždaug truks įrašas ir darbas, ir įgarsins visą. 100 puslapių paprastai — kelios minutės darbo.</p></div>
+    <div class="card"><h3>Kam patogiau klausyti</h3><p>Straipsnis, laiškas, užrašai — į mp3 ir į ausines: kelionėje, virtuvėje, pasivaikščiojant.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Ką moka</h2>
+  <div class="grid">
+    <div class="card"><h3>Du lietuviški balsai</h3><p><b>Ingutė</b> ir <b>Reginutė</b>, abu iš oficialaus <a href="https://github.com/OHF-Voice/piper1-gpl">Piper</a> balsų katalogo. Šalia ▸ — pasiklausyti prieš darant.</p></div>
+    <div class="card"><h3>Greičio slankiklis</h3><p>Lėčiau ar greičiau — kaip tau patogu. ↺ grąžina balso numatytąjį tempą.</p></div>
+    <div class="card"><h3>Iš failo arba iš lango</h3><p>.txt failas (tinka ir senas Windows kodavimas) arba įklijuotas ar įrašytas tekstas.</p></div>
+    <div class="card"><h3>Tarimo žodynėlis</h3><p>„Kaip parašyta → kaip turi skambėti“ — terminams ir pavardėms, su perklausa.</p></div>
+    <div class="card"><h3>Ekvalaizeris ⚙</h3><p>Septynios juostos nuo žemų iki aukštų, garsumas ir pauzė tarp pastraipų sekundėmis. Judini klausydamasis — garsas keičiasi iš karto. Ten pat ir greitis.</p></div>
+    <div class="card"><h3>Pažymėk ir ▸</h3><p>Pažymėk teksto gabalą ir spausk ▸ — išgirsi tik jį. Skaičiai ir santrumpos paverčiami žodžiais.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Kaip atrodo</h2>
+  <div class="shots">
+    <img src="langas.png" alt="Skaityklė: balsas Ingutė, greičio slankiklis, tekstas lange">
+    <img src="ekvalaizeris.png" alt="Garso nustatymai (⚙): septynių juostų ekvalaizeris nuo 125 Hz iki 8 kHz, greitis, garsumas, pauzė tarp pastraipų, mygtukas „Pasiklausyti“">
+    <img src="langas_failas.png" alt="Režimas „Iš failo“: balsas Reginutė, laukas failui pasirinkti ir vieta failo pradžiai">
+    <img src="apie.png" alt="Langas „Apie programą“: Skaityklė 0.1.1, DI žymėjimas, balsų kilmė ir licencijos">
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Kaip naudotis</h2>
+  <ol>
+    <li>Pasirink <b>balsą</b> ir, jei reikia, <b>greitį</b>.</li>
+    <li><b>Iš failo</b> — „Pasirinkti…“ ir .txt failas; <b>Iš lango</b> — įklijuok tekstą.</li>
+    <li><b>„Daryti mp3“</b> — failas atsiranda šalia teksto failo (arba kur nurodysi).</li>
+    <li><b>„Perklausyti“</b> — nepatiko? Pakeisk greitį, balsą ar garsą ir daryk iš naujo.</li>
+  </ol>
+  <p class="zyma"><b>Parsisiųsti:</b> <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Skaitykle-0.1.1-setup.exe</a> — apie 190 MB, Windows 10/11 (64 bitų). Diegiasi į tavo profilį, administratoriaus teisių nereikia. Balsai jau viduje — nieko papildomai siųstis nereikia.</p>
+  <p class="zyma"><b>Windows parodys mėlyną langą „Windows protected your PC“ / „Windows apsaugojo jūsų kompiuterį“.</b> Tai ne virusas — programa neturi mokamo kodo parašo, todėl SmartScreen nepažįsta leidėjo. Spausk „Daugiau informacijos“ → „Vis tiek vykdyti“. Failo sha256 suma yra Release puslapyje šalia failo.</p>
+</section>
+
+<section class="wrap">
+  <h2>Privatumas — tiesiai</h2>
+  <p>Tekstas ir garsas iš kompiuterio <b>neišeina</b>: balsai sukasi tavo kompiuteryje, internetas reikalingas tik parsisiųsti programą. Vienintelis mygtukas, vedantis į internetą, — „Klauskite DI“: jis paklausia, ar tikrai, ir tik tada atidaro naršyklėje claude.ai su programos prisistatymu. Tavo teksto ten nėra.</p>
+</section>
+
+<section class="wrap">
+  <h2>Balsai</h2>
+  <ul>
+    <li><b>Reginutė</b> — mokyta iš LIEPA garsyno, licencija <b>CC BY 4.0</b>.</li>
+    <li><b>Ingutė</b> — išaugo iš Reginutės modelio, mūsų Python įrankiais. Licencija <b>NewGenLTU OpenRAIL-D</b>: naudoti galima laisvai ir nemokamai, komercinio naudojimo nedraudžia; perduodant toliau reikia kartu perduoti <a href="https://github.com/RobertasTa/skaitykle/blob/main/skaitykle/balsai/LICENSE-VOICE-ingute">LICENSE-VOICE</a> ir nurodyti kilmę.</li>
+  </ul>
+  <p class="zyma">Abu balsai paskelbti oficialiame Piper balsų kataloge; programoje — tie patys failai, paleidžiama ji pasitikrina tai pagal kontrolines sumas.</p>
+</section>
+
+<section class="wrap">
+  <h2>Ribos</h2>
+  <ul>
+    <li><b>Datos</b> skaitomos kaip paprasti skaičiai („2026 m.“ — „du tūkstančiai dvidešimt šeši m.“), „mlrd.“ ir „°C“ neplečiami. Jei svarbu — parašyk žodžiais arba įrašyk į tarimo žodynėlį.</li>
+    <li>Kol kas skaito <b>tik .txt</b> ir įklijuotą tekstą (iš Word, PDF ar PowerPoint tekstą galima nukopijuoti į langą).</li>
+    <li><b>Tik lietuvių kalba, tik moteriški balsai</b>; tik Windows.</li>
+    <li>Tai <b>sintetinis balsas</b> — natūralus, bet ne žmogus.</li>
+  </ul>
+</section>
+
+<section class="wrap">
+  <h2>Nesiseka? Paklauskit dirbtinio intelekto</h2>
+  <div class="ask">
+    <p><b>Ne programuotojas?</b> Programoje spausk <b>„?“ → „Neradote atsakymo? Klauskite DI“</b> — atsidarys pokalbis su asistentu, kuris jau bus gavęs autoriaus instruktažą apie šią programą. Klausk savo žodžiais, lietuviškai.</p>
+    <p>Arba įklijuok į bet kurį DI pokalbį: <code>Perskaityk https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONSULTANT_BRIEF.md ir padėk man su Skaitykle.</code></p>
+  </div>
+</section>
+
+<section class="wrap padekos">
+  <h2>Ačiū</h2>
+  <p><a href="https://github.com/OHF-Voice/piper1-gpl"><b>Piper</b></a> ir <b>Michaelui Hansenui</b> — už variklį ir balsų katalogą; <b>LIEPA</b> garsyno kūrėjams; <b>Spotify</b> — už <a href="https://github.com/spotify/pedalboard">pedalboard</a> (ekvalaizeris ir mp3 skaitymas); <b>espeak-ng</b>, <b>Qt / PyQt6</b>, <b>ONNX Runtime</b>, <b>libsndfile</b> ir <b>LAME</b> kūrėjams.</p>
+  <p>Skaityklė yra burna, <a href="https://robertasta.github.io/diktuokle/">Diktuoklė</a> — ausys. Klausimai ir pastebėjimai — <a href="https://github.com/RobertasTa/skaitykle/issues">Issues</a>.</p>
+</section>
+
+<footer class="wrap">
+  <p><a href="https://github.com/RobertasTa/skaitykle">GitHub</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Parsisiųsti</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/blob/main/LICENSE">GPL v3</a> ·
+     <a href="https://github.com/RobertasTa">Kitos dovanos</a></p>
+  <p class="sig">Dovana nuo Claude ir Roberto</p>
+</footer>
+
+</body>
+</html>

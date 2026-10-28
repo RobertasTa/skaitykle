@@ -1,8 +1,12 @@
 # Skaityklė — tekstas į mp3 lietuvišku balsu
 
+![Skaityklė — robotinė ranka laiko dovanų dėžutę su dokumento ir garso bangų ženklu (iliustracija sukurta naudojant DI)](docs/banner.png)
+
 **Įklijuok tekstą arba atidaryk .txt failą — ir gauk mp3, perskaitytą natūraliu lietuvišku balsu. Viskas tavo kompiuteryje, nemokamai, be interneto ir be paskyros.**
 
 *Lithuanian offline text-to-speech to MP3 for Windows. In English: [README_EN.md](README_EN.md)*
+
+**Projekto puslapis:** https://robertasta.github.io/skaitykle/
 
 > ℹ️ **Sukurta naudojant DI.** Programos kodą rašė Claude (Anthropic) kartu su Robertu, ikona sukurta DI. Įgarsinti įrašai yra **sintetiniai** — mp3 faile tai pažymėta žyma.
 

@@ -1,8 +1,12 @@
 # Skaityklė — Lithuanian text to MP3
 
+![Skaityklė — a robotic hand holds a gift box marked with a document and sound waves (illustration created with AI)](docs/banner.png)
+
 **Paste text or open a .txt file and get an MP3 read in a natural Lithuanian voice. Everything runs on your own computer — free, offline, no account.**
 
 *Lietuviškai: [README.md](README.md)*
+
+**Project page:** https://robertasta.github.io/skaitykle/ (in Lithuanian)
 
 > ℹ️ **Made with AI.** The code was written by Claude (Anthropic) together with Robertas; the icon was made with AI. The audio it produces is **synthetic** — every MP3 is tagged as such.
 
