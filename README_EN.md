@@ -28,6 +28,10 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 - **Select a piece of text and press ▸** to hear just that.
 - **Numbers and abbreviations** are expanded into words (dates are still read as plain numbers — see "Limits").
 
+![Sound settings (⚙): seven-band equaliser from 125 Hz to 8 kHz, speed 1.17×, volume +6 dB, pause between paragraphs 1.3 s, "Pasiklausyti" (listen) button](docs/ekvalaizeris.png)
+
+!["From a file" mode: voice Reginutė, speed 1.17×, a field to pick the file and a preview area for its beginning](docs/langas_failas.png)
+
 ## Download
 
 **[Skaitykle-0.1.1-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — about 190 MB, Windows 10/11 (64-bit). Installs into your user profile, no administrator rights. The voices are inside — nothing else to download.
@@ -40,6 +44,10 @@ The program's interface is in Lithuanian — it is a tool for Lithuanian text.
 
 - **Reginutė** — learned from the LIEPA corpus, licence **CC BY 4.0**.
 - **Ingutė** — grown from the Reginutė model with the authors' Python tools. Licence **NewGenLTU OpenRAIL-D**: free to use, no charge, commercial use not forbidden; when passing it on, include [`LICENSE-VOICE`](skaitykle/balsai/LICENSE-VOICE-ingute) and state the origin.
+
+The program itself shows the voices' origin and licences under **"?" → "Apie..."** (About), and its manual under **"?" → "Instrukcija"**; **"?" → "Klauskite DI"** opens claude.ai with a ready-made introduction, only after you press OK.
+
+![About window: Skaityklė 0.1.1, AI disclosure, voice origin and licences](docs/apie.png)
 
 ## Limits
 

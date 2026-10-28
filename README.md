@@ -30,6 +30,8 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 - **Pažymėk teksto gabalą ir spausk ▸** — išgirsi tik jį.
 - **Skaičiai ir santrumpos** paverčiami žodžiais (datos kol kas skaitomos kaip paprasti skaičiai — žr. „Ribos").
 
+![Garso nustatymai (⚙): septynių juostų ekvalaizeris nuo 125 Hz iki 8 kHz, greitis 1,17×, garsumas +6 dB, pauzė tarp pastraipų 1,3 s, mygtukas „Pasiklausyti"](docs/ekvalaizeris.png)
+
 ## Parsisiųsti
 
 **[Skaitykle-0.1.1-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — apie 190 MB, Windows 10/11 (64 bitų). Diegiasi į tavo profilį, administratoriaus teisių nereikia. Balsai jau viduje — nieko papildomai siųstis nereikia.
@@ -43,14 +45,22 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 3. **„Daryti mp3"** — failas atsiranda šalia teksto failo (arba kur nurodysi).
 4. **„Perklausyti"** — nepatiko? Pakeisk greitį, balsą ar garsą ir daryk iš naujo.
 
-Išsamiau — programoje: **„?" → „Instrukcija"**.
+![Režimas „Iš failo": balsas Reginutė, greitis 1,17×, laukas failui pasirinkti ir vieta failo pradžiai](docs/langas_failas.png)
+
+Išsamiau — pačioje programoje: **„?" → „Instrukcija"**. Neradai atsakymo — **„?" → „Neradote atsakymo? Klauskite DI"**: programa paaiškina, kas įvyks, ir tik paspaudus OK atidaro claude.ai su jau paruoštu prisistatymu; savo klausimą rašai lietuviškai.
+
+| Instrukcija programoje | Klauskite DI |
+|---|---|
+| ![Instrukcijos langas: „Kaip naudoti" — balsas, greitis, tekstas iš failo arba lango](docs/instrukcija.png) | ![Langas „Neradote atsakymo? Klauskite DI": kas įvyks paspaudus OK, keturi žingsniai](docs/klauskite_di.png) |
 
 ## Balsai
 
 - **Reginutė** — mokyta iš LIEPA garsyno, licencija **CC BY 4.0**.
 - **Ingutė** — išaugo iš Reginutės modelio, mūsų Python įrankiais. Licencija **NewGenLTU OpenRAIL-D**: naudoti galima laisvai ir nemokamai, komercinio naudojimo nedraudžia; perduodant toliau reikia kartu perduoti [`LICENSE-VOICE`](skaitykle/balsai/LICENSE-VOICE-ingute) ir nurodyti kilmę.
 
-Abu balsai paskelbti oficialiame Piper balsų kataloge; programoje — tie patys failai (paleidžiama ji pasitikrina tai pagal kontrolines sumas).
+Abu balsai paskelbti oficialiame Piper balsų kataloge; programoje — tie patys failai (paleidžiama ji pasitikrina tai pagal kontrolines sumas). Balsų kilmė ir licencijos parašytos ir pačioje programoje, **„?" → „Apie..."**:
+
+![Langas „Apie programą": Skaityklė 0.1.1, DI žymėjimas, balsų kilmė ir licencijos](docs/apie.png)
 
 ## Ribos
 
