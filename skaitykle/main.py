@@ -13,6 +13,11 @@ Jokių režimų: ką matai, tą ir girdi. Eilutė „---" dalija į kelis mp3 (p
 
 Išvaizda — Diktuoklės šeimos („tai jau tampa kaip tavo vizitinė kortelė"). Vardas ir ikona — Roberto.
 
+0.2 (2026-10-29) — keturios kalbos ir keturios sąsajos (Roberto: „interfeisas gali keistis nuo to,
+kaip langelyje pasirenkam kalbą"). Pakeitus kalbą langas PERKURIAMAS (`_kalba_pakeista`): visi
+tekstai imami iš `K.t()` kuriant, o tekstas lange, failas, mp3 kelias ir nustatymai perduodami
+naujam langui. Balsai parsisiunčiami pagal poreikį (⚙ → Kalbos ir balsai, `balsu_siuntimas.py`).
+
 ⛔ PyQt6 spąstai, į kuriuos jau esam įkritę: identifikatoriai TIK ASCII; nuorodos į gijas ANT
 self ir niekur nenulinamos (`OKF_PyQt6_GUI\\pyqt6_threading_guard.md`); išjungiami valdikliai
 po vieną, ne jų tėvas.
@@ -58,16 +63,20 @@ from PyQt6.QtWidgets import (QApplication, QComboBox, QDialog, QFileDialog, QGri
                              QWidget)
 
 import balsas
+import balsu_siuntimas
 import garsas
+import kalba as K
 from dantratis import GarsoNustatymai
 from tarimas import TarimoZodynas
 
 PAVADINIMAS = 'Skaityklė'
-VERSIJA = '0.1.1'
+VERSIJA = '0.2.0'
 # Ikona — PROGRAMOS kataloge (pakete `_internal\`), ne `build\`: iš ten ji į exe nepatektų.
 # Roberto GPT paveikslas, kampai iškirpti `_ikona\kirpk_kvadrata.py` (spindulys pagal įstrižainę).
 IKONA = os.path.join(CIA, 'Skaitykle.ico')
-README = os.path.join(CIA, 'README.txt')
+# Instrukcija — kiekvienai sąsajos kalbai savas failas (lietuviškas — be priesagos, kaip buvo).
+README = {'lt': os.path.join(CIA, 'README.txt'), 'en': os.path.join(CIA, 'README_en.txt'),
+          'ru': os.path.join(CIA, 'README_ru.txt'), 'de': os.path.join(CIA, 'README_de.txt')}
 # „?" → „Klauskite DI" (šeimos standartas iš Diktuoklės). Nuoroda įrašyta IŠ ANKSTO, kaip
 # SpeakDream'e: kol repo neviešas, ji neatsidaro, todėl promptas pats pasako, kad tas pats
 # failas guli šalia programos — meluoti apie neveikiančią nuorodą būtų blogiau.
@@ -76,13 +85,22 @@ BRIEF_URL = 'https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONS
 # ES DI akto 50 str.: sintetinis garsas žymimas mašinai skaitomai. Balsų vardų NErašom
 # (Roberto sprendimas 10-02). ⛔ ID3 žymose lietuviškos raidės susigadina (libsndfile/LAME
 # rašo baitus kaip Latin-1; pamatuota 10-28) — todėl žymos tik ASCII.
-ZYME_DI = 'Sintetinis balsas (DI) - Skaitykle'
+ZYME_DI = {'lt': 'Sintetinis balsas (DI) - Skaitykle', 'en': 'Synthetic voice (AI) - Skaitykle',
+           'ru': 'Synthetic voice (AI) - Skaitykle', 'de': 'Synthetische Stimme (KI) - Skaitykle'}
 APLANKAS = os.path.join(os.environ.get('APPDATA') or os.path.expanduser('~'), 'Skaitykle')
 NUSTATYMAI = os.path.join(APLANKAS, 'nustatymai.json')
 TARIMAS = os.path.join(APLANKAS, 'tarimas.json')
+# Instaliatoriaus varnelės (Diktuoklės receptas): VIENKARTINIS failas — programa jį perskaito,
+# pasiūlo parsisiųsti pažymėtų kalbų balsus ir ištrina. Tylus diegimas (winget) jo nerašo — kad
+# atnaujinimas neperrašytų žmogaus pasirinktos kalbos Windows kalba.
+DIEGIMAS = os.path.join(APLANKAS, 'diegimo_kalbos.json')
 PAVYZDYS = ('Laba diena. Šiandien kalbėsime apie fotosintezę, procesą, kurio metu augalai, '
             'naudodami saulės šviesą, gamina deguonį. Pasiklausykite, kaip skamba balsas, ir '
             'pasirinkite, kas jūsų ausiai maloniausia.')
+LANGO_UZUOMINA = ('Įklijuokite ar įrašykite tekstą čia.\n\n'
+                  'Tuščia eilutė — pauzė tarp pastraipų.\n'
+                  'Eilutė  ---  padalins įrašą į kelis mp3 (pvz., po vieną kiekvienai skaidrei).\n'
+                  'Pažymėkite fragmentą ir spauskite ▸ — išgirsite tik jį.')
 PABAIGOS_TYLA = 0.7     # s po paskutinės pastraipos (recepto pabaiga)
 PAZYMETO_RIBA = 3000    # simbolių: tiek daugiausia groja „▸" iš pažymėto teksto
 PERZIUROS_RIBA = 3000   # simbolių failo pradžios, rodomos „Iš failo" režimu
@@ -91,6 +109,8 @@ PERZIUROS_RIBA = 3000   # simbolių failo pradžios, rodomos „Iš failo" reži
 # ~20× greitesnė už realų laiką procesoriumi. Tai „≈", ne pažadas.
 SIMB_PER_SEK = 16.0
 DARBO_GREITIS = 20.0
+
+_LANGAI = []        # gyvas pagrindinis langas (perkuriant kita kalba — naujas)
 
 # Būsenos taško spalvos — tos pačios kaip Diktuoklės.
 ZALIA, GELTONA, RAUDONA, PILKA = '#4ADE80', '#ffaa00', '#ff6a6a', '#888888'
@@ -181,9 +201,9 @@ def trukmes_ivertis(tekstas, greitis, pauze):
         return ''
     pastraipu = sum(len(balsas.pastraipos(d)) for d in dalys) if simb < 500000 else simb // 300
     sek = simb / (SIMB_PER_SEK * max(0.3, greitis)) + max(0, pastraipu - len(dalys)) * pauze
-    out = '≈ %s garso' % _laikas(sek)
+    out = K.t('≈ %s garso') % _laikas(sek)
     if sek > 120:
-        out += ' · darbas ≈ %s' % _laikas(sek / DARBO_GREITIS)
+        out += K.t(' · darbas ≈ %s') % _laikas(sek / DARBO_GREITIS)
     return out
 
 
@@ -192,11 +212,26 @@ def _laikas(sek):
     if sek < 60:
         return '%d s' % max(1, sek)
     v, m = divmod(sek // 60, 60)
-    return ('%d val. %02d min' % (v, m)) if v else ('%d min' % m)
+    return (K.t('%d val. %02d min') % (v, m)) if v else (K.t('%d min') % m)
+
+
+# Kirilica → lotyniški rašmenys (paprasta transliteracija): ID3 žymos tik ASCII, o be šito rusiško
+# failo pavadinimas žymoje būtų tuščias (NFKD kirilicos raidžių neišskaido).
+_KIRILICA = dict(zip('абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+                     ['a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n',
+                      'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'shch', '', 'y',
+                      '', 'e', 'yu', 'ya']))
 
 
 def ascii_tekstas(t):
-    """„Fotosintezė ir šviesa" → „Fotosinteze ir sviesa" (ID3 žymoms, žr. ZYME_DI)."""
+    """„Fotosintezė ir šviesa" → „Fotosinteze ir sviesa", „Фотосинтез" → „Fotosintez"
+    (ID3 žymoms, žr. ZYME_DI)."""
+    def raide(c):
+        lot = _KIRILICA.get(c.lower())
+        if lot is None:
+            return c
+        return lot.capitalize() if c.isupper() else lot
+    t = ''.join(raide(c) for c in t)
     return unicodedata.normalize('NFKD', t).encode('ascii', 'ignore').decode('ascii')
 
 
@@ -217,7 +252,7 @@ def pavyzdzio_tekstas(tekstas):
                 break
             tekstas = (tekstas + ' ' + s).strip()
         tekstas = tekstas[:600]
-    return tekstas or PAVYZDYS
+    return tekstas or K.t(PAVYZDYS)
 
 
 def vardas_is_teksto(tekstas):
@@ -225,7 +260,7 @@ def vardas_is_teksto(tekstas):
     pirma = next((e.strip() for e in (tekstas or '').splitlines() if e.strip()), '')
     pirma = re.sub(r'[\\/:*?"<>|.,;!]+', ' ', pirma)
     pirma = ' '.join(pirma.split()[:6])[:50].strip()
-    return pirma or 'igarsinta'
+    return pirma or K.t('igarsinta')
 
 
 def daliu_keliai(mp3, kiek):
@@ -237,9 +272,26 @@ def daliu_keliai(mp3, kiek):
 
 
 def skaityk_tarima():
+    """{kalba: [[rašoma, tariama], ...]}. 0.1.x failas buvo vienas sąrašas — jis lietuviškas."""
     try:
         with open(TARIMAS, encoding='utf-8') as f:
-            return [[str(r), str(t)] for r, t in json.load(f)]
+            d = json.load(f)
+    except Exception:
+        return {}
+    if isinstance(d, list):
+        d = {'lt': d}
+    try:
+        return {k: [[str(r), str(t)] for r, t in v] for k, v in d.items() if k in K.KALBOS}
+    except Exception:
+        return {}
+
+
+def skaityk_diegima():
+    """Instaliatoriaus varnelės: [kalbos] arba [] (failo nėra / sugadintas)."""
+    try:
+        with open(DIEGIMAS, encoding='utf-8-sig') as f:
+            kalbos = json.load(f).get('kalbos') or []
+        return [k for k in kalbos if k in K.KALBOS]
     except Exception:
         return []
 
@@ -268,7 +320,8 @@ class Darbininkas(QObject):
                       for k, d in zip(self.keliai, self.dalys)]
             darbas = [(k, p) for k, p in darbas if p]
             if not darbas:
-                self.baigta.emit('klaida', 'Nėra teksto, kurį būtų galima perskaityti.', 0.0, [])
+                self.baigta.emit('klaida', K.t('Nėra teksto, kurį būtų galima perskaityti.'),
+                                 0.0, [])
                 return
             is_viso = sum(len(p) for _, p in darbas)
             b = balsas.Balsas(self.raktas, self.greitis)
@@ -281,7 +334,7 @@ class Darbininkas(QObject):
                 kadru = 0
                 with sf.SoundFile(laikinas, 'w', b.daznis, 1, format='MP3') as f:
                     f.title = ascii_tekstas(os.path.splitext(os.path.basename(kelias))[0])
-                    f.comment = ZYME_DI
+                    f.comment = ZYME_DI[b.kalba]
                     for i, p in enumerate(pastraipos):
                         if self._stop:
                             break
@@ -302,9 +355,12 @@ class Darbininkas(QObject):
                 sekundes += kadru / b.daznis
             self.baigta.emit('gerai', '', sekundes, padaryti)
         except PermissionError:
-            self.baigta.emit('klaida', 'Nepavyko įrašyti failo:\n%s\n\nGal jis atidarytas kitoje '
-                             'programoje (grotuve)? Uždarykite ją ir bandykite dar kartą.'
+            self.baigta.emit('klaida', K.t('Nepavyko įrašyti failo:\n%s\n\nGal jis atidarytas '
+                                           'kitoje programoje (grotuve)? Uždarykite ją ir bandykite '
+                                           'dar kartą.')
                              % (laikinas or '').replace('.kuriama', ''), sekundes, padaryti)
+        except balsas.BalsoNera as e:
+            self.baigta.emit('klaida', str(e), sekundes, padaryti)
         except Exception as e:
             self.baigta.emit('klaida', '%s: %s' % (type(e).__name__, e), sekundes, padaryti)
         finally:
@@ -331,16 +387,29 @@ class PavyzdzioDarbininkas(QObject):
                 dalys += [b.pastraipa(p), np.zeros(int(b.daznis * 0.5), dtype='float32')]
             self.paruosta.emit(np.concatenate(dalys) if dalys else np.zeros(0, 'float32'),
                                b.daznis, '')
+        except balsas.BalsoNera as e:
+            self.paruosta.emit(None, 0, str(e))
         except Exception as e:
             self.paruosta.emit(None, 0, '%s: %s' % (type(e).__name__, e))
 
 
 class Langas(QWidget):
-    def __init__(self):
+    def __init__(self, busena=None):
+        """`busena` — kai langas perkuriamas pakeitus kalbą: tai, ko nėra nustatymų faile
+        (tekstas lange, failas, sesijos mp3), žr. `_kalba_pakeista`."""
         super().__init__()
+        busena = busena or {}
+        n = self._skaityk_nustatymus()
+        # Kalba = sąsajos kalba (Roberto 10-29). Eilė: perkuriant — nauja; po diegimo — pirma
+        # pažymėta varnelė; toliau — išsaugota; pirmą kartą — Windows kalba.
+        diegimas = skaityk_diegima()
+        kodas = busena.get('kalba') or (diegimas[0] if diegimas else None)
+        if kodas not in K.KALBOS:
+            kodas = n.get('kalba') if n.get('kalba') in K.KALBOS else K.os_kalba()
+        K.nustatyk(kodas)
         self.setObjectName('saknis')
         self.setStyleSheet(STILIUS)
-        self.setWindowTitle('%s — tekstas į mp3' % PAVADINIMAS)
+        self.setWindowTitle(K.t('%s — tekstas į mp3') % PAVADINIMAS)
         if os.path.exists(IKONA):
             self.setWindowIcon(QIcon(IKONA))
         self.setMinimumSize(640, 620)
@@ -361,32 +430,40 @@ class Langas(QWidget):
         self._paskutiniai = []      # paskutinio darymo failai — „Perklausyti" groja juos
         self._txt_kelias = ''       # „Iš failo" režimo failas
         self._lango_tekstas = ''    # „Iš lango" režimo tekstas, kol rodomas failas
-        n = self._skaityk_nustatymus()
         self._aplankas = n.get('aplankas', os.path.expanduser('~'))
         eq = n.get('eq', [0] * len(garsas.JUOSTOS))
         self._eq = [int(v) for v in eq][:len(garsas.JUOSTOS)]
         self._eq += [0] * (len(garsas.JUOSTOS) - len(self._eq))
         self._garsumas = int(n.get('garsumas', garsas.GARSUMAS_NUMATYTAS))
         self._pauze = float(n.get('pauze', garsas.PAUZE_NUMATYTA))
-        self._tarimas = skaityk_tarima()
+        # Tarimo žodynėlis — kiekvienai kalbai savas; `_tarimas` — šios kalbos poros.
+        self._tarimai = skaityk_tarima()
+        self._tarimas = self._tarimai.get(K.LANG, [])
         # Grotuvo gija skaito TIK šitą kortežą (vienas priskyrimas — saugu tarp gijų).
         self._eq_dabar = (tuple(self._eq), self._garsumas)
 
-        # Kalba → balsas, kaip SpeakDream. Kol kas viena kalba, bet sąrašas jau tikras.
+        # Kalba → balsas, kaip SpeakDream. Kalbų vardai — SAVO kalba (kelias atgal visada matosi).
         self.kalba = QComboBox()
-        for kodas, (vardas, _) in balsas.KALBOS.items():
-            self.kalba.addItem(vardas, kodas)
+        for kodas_, (vardas, _) in balsas.KALBOS.items():
+            self.kalba.addItem(vardas, kodas_)
+        self.kalba.setCurrentIndex(max(0, self.kalba.findData(K.LANG)))
+        self.kalba.currentIndexChanged.connect(self._kalba_pakeista)
         self.balsas = QComboBox()
-        i = self.kalba.findData(n.get('kalba'))
-        if i >= 0:
-            self.kalba.setCurrentIndex(i)
-        self._uzpildyk_balsus(n.get('balsas'))
-        self.kalba.currentIndexChanged.connect(lambda _i: self._uzpildyk_balsus(None))
         self.b_pavyzdys = QPushButton('▸')
         self.b_pavyzdys.setObjectName('ikona')
-        self.b_pavyzdys.setToolTip('Pasiklausyti: pažymėtą tekstą arba teksto pradžią, '
-                                   'su dabartiniais nustatymais')
+        self.b_pavyzdys.setToolTip(K.t('Pasiklausyti: pažymėtą tekstą arba teksto pradžią, '
+                                       'su dabartiniais nustatymais'))
         self.b_pavyzdys.clicked.connect(self._pavyzdys_paspaustas)
+        # Rodomas TIK kai šios kalbos balsų dar nėra — kvietimas, ne nuolatinis mygtukas.
+        self.b_siusti = QPushButton(K.t('Parsisiųsti balsą…'))
+        self.b_siusti.setProperty('aktyvus', 'taip')
+        self.b_siusti.setToolTip(K.t('Šios kalbos balsai dar neparsisiųsti (⚙ → Kalbos ir balsai)'))
+        self.b_siusti.clicked.connect(lambda: self._rodyk_nustatymus([K.LANG]))
+        # Balsas įsimenamas KIEKVIENAI kalbai (grįžus į lietuvių — vėl Reginutė, jei ją rinkaisi).
+        self._balsai = {k: r for k, r in (n.get('balsai') or {}).items() if r in balsas.BALSAI}
+        if n.get('balsas') in balsas.BALSAI:      # 0.1.x nustatymai — vienas balsas
+            self._balsai.setdefault(balsas.BALSAI[n['balsas']][1], n['balsas'])
+        self._uzpildyk_balsus(self._balsai.get(K.LANG))
 
         # Kaip Vertėjo slankiklis: 0,6–1,4 karto, 1,0 — balso numatytasis tempas.
         self.greitis = QSlider(Qt.Orientation.Horizontal)
@@ -400,11 +477,11 @@ class Langas(QWidget):
         self._greitis_pakeistas(self.greitis.value())
         self.b_numatytas = QPushButton('↺')
         self.b_numatytas.setObjectName('ikona')
-        self.b_numatytas.setToolTip('Balso numatytasis greitis (1,00×)')
+        self.b_numatytas.setToolTip(K.t('Balso numatytasis greitis (1,00×)'))
         self.b_numatytas.clicked.connect(lambda: self.greitis.setValue(100))
         greitis = QHBoxLayout()
         greitis.setSpacing(8)
-        lec, grei = QLabel('lėčiau'), QLabel('greičiau')
+        lec, grei = QLabel(K.t('lėčiau')), QLabel(K.t('greičiau'))
         lec.setObjectName('uzuomina')
         grei.setObjectName('uzuomina')
         greitis.addWidget(lec)
@@ -416,12 +493,16 @@ class Langas(QWidget):
         tinklas = QGridLayout()
         tinklas.setHorizontalSpacing(8)
         tinklas.setVerticalSpacing(8)
-        tinklas.addWidget(QLabel('Kalba'), 0, 0)
+        tinklas.addWidget(QLabel(K.t('Kalba')), 0, 0)
         tinklas.addWidget(self.kalba, 0, 1, 1, 2)
-        tinklas.addWidget(QLabel('Balsas'), 1, 0)
+        tinklas.addWidget(QLabel(K.t('Balsas')), 1, 0)
         tinklas.addWidget(self.balsas, 1, 1)
-        tinklas.addWidget(self.b_pavyzdys, 1, 2, Qt.AlignmentFlag.AlignLeft)
-        tinklas.addWidget(QLabel('Greitis'), 2, 0)
+        prie_balso = QHBoxLayout()
+        prie_balso.setSpacing(6)
+        prie_balso.addWidget(self.b_pavyzdys)
+        prie_balso.addWidget(self.b_siusti)
+        tinklas.addLayout(prie_balso, 1, 2, Qt.AlignmentFlag.AlignLeft)
+        tinklas.addWidget(QLabel(K.t('Greitis')), 2, 0)
         tinklas.addLayout(greitis, 2, 1, 1, 2)
         tinklas.setColumnStretch(1, 1)
         tinklas.setColumnMinimumWidth(0, 72)
@@ -430,19 +511,19 @@ class Langas(QWidget):
         # sugalvos įsikelti"). „Iš failo": knygai lango nereikia — rodom vardą, dydį, kiek
         # užtruks ir tik pradžią; failas skaitomas darymo metu (pataisei Užrašinėje — nieko
         # iš naujo rinktis nereikia). „Iš lango": įklijuoji ar rašai, kaip dėstytojas iš skaidrių.
-        self.r_failas = QRadioButton('Iš failo')
-        self.r_langas = QRadioButton('Iš lango')
+        self.r_failas = QRadioButton(K.t('Iš failo'))
+        self.r_langas = QRadioButton(K.t('Iš lango'))
         self.r_failas.toggled.connect(self._rezimas_pakeistas)
-        self.b_tarimas = QPushButton('Tarimas…')
-        self.b_tarimas.setToolTip('Tarimo žodynėlis: kaip parašyta → kaip turi skambėti')
+        self.b_tarimas = QPushButton(K.t('Tarimas…'))
+        self.b_tarimas.setToolTip(K.t('Tarimo žodynėlis: kaip parašyta → kaip turi skambėti'))
         self.b_tarimas.clicked.connect(self._rodyk_tarima)
         saltinis = QHBoxLayout()
         saltinis.setSpacing(18)
-        zyme = QLabel('Tekstas')
+        zyme = QLabel(K.t('Tekstas'))
         zyme.setMinimumWidth(72)
         saltinis.addWidget(zyme)
-        self.b_isvalyti = QPushButton('Išvalyti')
-        self.b_isvalyti.setToolTip('Išvalyti pasirinktą šaltinį: failą arba lango tekstą')
+        self.b_isvalyti = QPushButton(K.t('Išvalyti'))
+        self.b_isvalyti.setToolTip(K.t('Išvalyti pasirinktą šaltinį: failą arba lango tekstą'))
         self.b_isvalyti.clicked.connect(self._isvalyk)
         saltinis.addWidget(self.r_failas)
         saltinis.addWidget(self.r_langas)
@@ -455,8 +536,8 @@ class Langas(QWidget):
         # langas nešokinėja, o žmogus mato, kas būtų kitame režime.
         self.txt = QLineEdit()
         self.txt.setReadOnly(True)
-        self.txt.setPlaceholderText('.txt failas — spauskite „Pasirinkti…"')
-        self.b_txt = QPushButton('Pasirinkti…')
+        self.txt.setPlaceholderText(K.t('.txt failas — spauskite „Pasirinkti…"'))
+        self.b_txt = QPushButton(K.t('Pasirinkti…'))
         self.b_txt.clicked.connect(self._atidaryk_txt)
         self.teksto_info = QLabel()
         self.teksto_info.setObjectName('uzuomina')
@@ -469,32 +550,29 @@ class Langas(QWidget):
         fe.addWidget(self.b_txt)
 
         self.tekstas = QPlainTextEdit()
-        self.tekstas.setPlaceholderText(
-            'Įklijuokite ar įrašykite tekstą čia.\n\n'
-            'Tuščia eilutė — pauzė tarp pastraipų.\n'
-            'Eilutė  ---  padalins įrašą į kelis mp3 (pvz., po vieną kiekvienai skaidrei).\n'
-            'Pažymėkite fragmentą ir spauskite ▸ — išgirsite tik jį.')
+        self.tekstas.setPlaceholderText(K.t(LANGO_UZUOMINA))
         self.tekstas.setMinimumHeight(180)
         self.tekstas.textChanged.connect(self._tekstas_pakeistas)
         self._failo_tekstas = ''        # „Iš failo" režimu — paskutinį kartą perskaitytas
 
         self.mp3 = QLineEdit()
-        self.mp3.setPlaceholderText('kur įrašyti .mp3 (paklausiu, jei tuščia)')
-        self.mp3.setToolTip('Jei tekste yra „---", failai bus numeruojami: vardas_01.mp3, vardas_02.mp3…')
-        self.b_mp3 = QPushButton('Pasirinkti…')
+        self.mp3.setPlaceholderText(K.t('kur įrašyti .mp3 (paklausiu, jei tuščia)'))
+        self.mp3.setToolTip(K.t('Jei tekste yra „---", failai bus numeruojami: vardas_01.mp3, '
+                                'vardas_02.mp3…'))
+        self.b_mp3 = QPushButton(K.t('Pasirinkti…'))
         self.b_mp3.clicked.connect(self._rink_mp3)
         irasyti = QHBoxLayout()
         irasyti.setSpacing(8)
-        zyme = QLabel('Įrašyti į')
+        zyme = QLabel(K.t('Įrašyti į'))
         zyme.setMinimumWidth(72)
         irasyti.addWidget(zyme)
         irasyti.addWidget(self.mp3, 1)
         irasyti.addWidget(self.b_mp3)
 
-        self.daryti = QPushButton('Daryti mp3')
+        self.daryti = QPushButton(K.t('Daryti mp3'))
         self.daryti.setProperty('aktyvus', 'taip')
         self.daryti.clicked.connect(self._daryti_paspaustas)
-        self.klausyti = QPushButton('▶  Perklausyti')
+        self.klausyti = QPushButton(K.t('▶  Perklausyti'))
         self.klausyti.clicked.connect(self._klausyti_paspaustas)
         mygtukai = QHBoxLayout()
         mygtukai.setSpacing(6)
@@ -511,17 +589,17 @@ class Langas(QWidget):
         self.juosta.setValue(0)
         self.b_nust = QPushButton('⚙')
         self.b_nust.setObjectName('ikona')
-        self.b_nust.setToolTip('Garso nustatymai: ekvalaizeris, garsumas, pauzės')
-        self.b_nust.clicked.connect(self._rodyk_nustatymus)
+        self.b_nust.setToolTip(K.t('Nustatymai: ekvalaizeris, garsumas, pauzės, kalbų balsai'))
+        self.b_nust.clicked.connect(lambda: self._rodyk_nustatymus())
         # "?" - šeimos standartas (Diktuoklė, SDF etalonas): meniu su trim punktais,
         # instrukcija gyvena PAČIOJE programoje, tinklas — tik paspaudus „Klauskite DI".
         self.b_pag = QPushButton('?')
         self.b_pag.setObjectName('ikona')
-        self.b_pag.setToolTip('Pagalba')
+        self.b_pag.setToolTip(K.t('Pagalba'))
         pagalba = QMenu(self.b_pag)
-        pagalba.addAction('Apie...', self._rodyk_apie)
-        pagalba.addAction('Instrukcija', self._rodyk_instrukcija)
-        pagalba.addAction('Neradote atsakymo? Klauskite DI', self._klausk_di)
+        pagalba.addAction(K.t('Apie...'), self._rodyk_apie)
+        pagalba.addAction(K.t('Instrukcija'), self._rodyk_instrukcija)
+        pagalba.addAction(K.t('Neradote atsakymo? Klauskite DI'), self._klausk_di)
         self.b_pag.setMenu(pagalba)
         apacia = QHBoxLayout()
         apacia.setSpacing(8)
@@ -544,13 +622,13 @@ class Langas(QWidget):
         visas.addLayout(apacia)
 
         # Be klaviatūros fokuso rėmelio ant mygtukų (Roberto pastaba Diktuoklei 09-08).
-        for b in (self.b_pavyzdys, self.b_numatytas, self.b_txt, self.b_isvalyti, self.b_tarimas,
-                  self.b_mp3, self.daryti, self.klausyti, self.b_nust, self.b_pag,
+        for b in (self.b_pavyzdys, self.b_siusti, self.b_numatytas, self.b_txt, self.b_isvalyti,
+                  self.b_tarimas, self.b_mp3, self.daryti, self.klausyti, self.b_nust, self.b_pag,
                   self.r_failas, self.r_langas):
             b.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Išjungiami darbo metu — po vieną (⛔ išjungtas tėvas numarina vaikus).
-        self._valdikliai = [self.kalba, self.balsas, self.b_pavyzdys, self.greitis,
+        self._valdikliai = [self.kalba, self.balsas, self.b_pavyzdys, self.b_siusti, self.greitis,
                             self.b_numatytas, self.r_failas, self.r_langas, self.b_txt,
                             self.b_isvalyti, self.b_tarimas, self.tekstas, self.mp3, self.b_mp3,
                             self.klausyti, self.b_nust]
@@ -567,11 +645,23 @@ class Langas(QWidget):
         self._perdaryk_laikmatis.timeout.connect(self._perdaryk_pavyzdi)
         self.greitis.valueChanged.connect(self._greitis_visur)
 
+        # Perkuriant langą (kita kalba) — tai, ko nustatymų faile nėra.
+        if busena:
+            self._lango_tekstas = busena.get('lango_tekstas', '')
+            self._txt_kelias = busena.get('txt_kelias', '')
+            self._failo_tekstas = busena.get('failo_tekstas', '')
+            self._sukurti = set(busena.get('sukurti', ()))
+            self._paskutiniai = list(busena.get('paskutiniai', ()))
+            self.txt.setText(self._txt_kelias)
         # Režimas — iš nustatymų; pirmą kartą „Iš failo" (Roberto pradinis užsakymas).
         (self.r_langas if n.get('rezimas') == 'langas' else self.r_failas).setChecked(True)
         self._rezimas_pakeistas()
-        self._rodyk_busena('Pasirinkite .txt failą arba įklijuokite tekstą, tada „Daryti mp3".',
-                           PILKA)
+        if busena.get('mp3'):
+            self.mp3.setText(busena['mp3'])
+        self._rodyk_busena(K.t('Pasirinkite .txt failą arba įklijuokite tekstą, tada „Daryti '
+                               'mp3".'), PILKA)
+        self.balsas.currentIndexChanged.connect(lambda _i: self._pritaikyk_balsa())
+        self._pritaikyk_balsa()
 
     # ---- būsena, balsai, greitis, tekstas ------------------------------------------------
     def _rodyk_busena(self, tekstas, spalva):
@@ -580,13 +670,66 @@ class Langas(QWidget):
 
     def _uzpildyk_balsus(self, norimas):
         self.balsas.clear()
-        for raktas in balsas.KALBOS[self.kalba.currentData()][1]:
+        for raktas in balsas.KALBOS[K.LANG][1]:
             self.balsas.addItem(balsas.BALSAI[raktas][0], raktas)
         i = self.balsas.findData(norimas)
         self.balsas.setCurrentIndex(i if i >= 0 else 0)
 
+    def _yra_balsas(self):
+        r = self.balsas.currentData()
+        return bool(r) and balsu_siuntimas.yra(r)
+
+    def _ar_dirba_kas(self):
+        return ((self._thread is not None and self._ar_dirba(self._thread))
+                or (self._pthread is not None and self._ar_dirba(self._pthread)))
+
+    def _pritaikyk_balsa(self):
+        """Nėra balso — „Daryti" ir ▸ užgęsta (neslepiami), atsiranda „Parsisiųsti balsą…".
+        Kviečiama ten, kur anksčiau „Daryti" būdavo tiesiog įjungiamas: po darbo, po pavyzdžio,
+        po grojimo, po siuntimo ir pakeitus balsą."""
+        yra = self._yra_balsas()
+        self.b_siusti.setVisible(not yra)
+        self.b_pavyzdys.setEnabled(yra)
+        groja = self._grojimas is not None and self._grojimas.is_alive()
+        self.daryti.setEnabled(yra and not groja)
+        if not yra:
+            self._rodo_trukuma = True
+            self._rodyk_busena(K.t('%s kalbos balsai dar neparsisiųsti (%d MB). Spauskite '
+                                   '„Parsisiųsti balsą…" — tai daroma vieną kartą.')
+                               % (K.VARDAI[K.LANG], balsas.kalbos_mb(K.LANG)), GELTONA)
+        elif getattr(self, '_rodo_trukuma', False):
+            self._rodo_trukuma = False
+            self._rodyk_busena(K.t('Balsai paruošti. Pasirinkite .txt failą arba įklijuokite '
+                                   'tekstą, tada „Daryti mp3".'), ZALIA)
+
+    def _kalba_pakeista(self, _i):
+        """Kita kalba → langas perkuriamas ta kalba (Roberto 10-29). Kol vyksta darbas ar ruošiamas
+        pavyzdys — atgal: tų gijų savininkas yra šis langas."""
+        kodas = self.kalba.currentData()
+        if kodas == K.LANG:
+            return
+        if self._ar_dirba_kas():
+            self.kalba.blockSignals(True)
+            self.kalba.setCurrentIndex(max(0, self.kalba.findData(K.LANG)))
+            self.kalba.blockSignals(False)
+            return
+        self._stabdyk_groti()
+        if not self.is_failo():
+            self._lango_tekstas = self.tekstas.toPlainText()
+        busena = {'kalba': kodas, 'lango_tekstas': self._lango_tekstas,
+                  'txt_kelias': self._txt_kelias, 'failo_tekstas': self._failo_tekstas,
+                  'sukurti': set(self._sukurti), 'paskutiniai': list(self._paskutiniai),
+                  'mp3': self.mp3.text()}
+        self._issaugok_nustatymus()      # dar SENOS kalbos balsas ir žodynėlis — į failą
+        naujas = Langas(busena)
+        naujas.setGeometry(self.geometry())
+        # PIRMA rodom naują: uždarius paskutinį matomą langą Qt baigtų visą programą.
+        naujas.show()
+        _LANGAI[:] = [naujas]            # nuoroda gyva, kad GC nesurinktų
+        self.close()
+
     def _greitis_pakeistas(self, v):
-        self.greitis_zyme.setText(('%.2f×' % (v / 100.0)).replace('.', ','))
+        self.greitis_zyme.setText(K.skaicius(v / 100.0) + '×')
 
     def _greitis_visur(self, v):
         """Pagrindinio lango slankiklis — vienintelė greičio tiesa; dantratis rodo tą patį."""
@@ -625,14 +768,10 @@ class Langas(QWidget):
         self.tekstas.blockSignals(True)
         if failas:
             self.tekstas.setPlainText(self._perziura(self._failo_tekstas))
-            self.tekstas.setPlaceholderText('Čia bus rodoma failo pradžia.')
+            self.tekstas.setPlaceholderText(K.t('Čia bus rodoma failo pradžia.'))
         else:
             self.tekstas.setPlainText(self._lango_tekstas)
-            self.tekstas.setPlaceholderText(
-                'Įklijuokite ar įrašykite tekstą čia.\n\n'
-                'Tuščia eilutė — pauzė tarp pastraipų.\n'
-                'Eilutė  ---  padalins įrašą į kelis mp3 (pvz., po vieną kiekvienai skaidrei).\n'
-                'Pažymėkite fragmentą ir spauskite ▸ — išgirsite tik jį.')
+            self.tekstas.setPlaceholderText(K.t(LANGO_UZUOMINA))
         self.tekstas.blockSignals(False)
         if failas and self._txt_kelias:
             self.mp3.setText(os.path.splitext(self._txt_kelias)[0] + '.mp3')
@@ -642,7 +781,8 @@ class Langas(QWidget):
     def _perziura(tekstas):
         if len(tekstas) <= PERZIUROS_RIBA:
             return tekstas
-        return tekstas[:PERZIUROS_RIBA].rstrip() + '\n\n[… rodoma tik pradžia — įgarsinamas visas failas]'
+        return (tekstas[:PERZIUROS_RIBA].rstrip() + '\n\n'
+                + K.t('[… rodoma tik pradžia — įgarsinamas visas failas]'))
 
     def saltinio_tekstas(self, is_naujo=True):
         """Tai, kas bus įgarsinta. „Iš failo" — failas perskaitomas IŠ NAUJO (pataisei
@@ -650,7 +790,7 @@ class Langas(QWidget):
         if not self.is_failo():
             return self.tekstas.toPlainText()
         if self._txt_kelias and is_naujo:
-            self._failo_tekstas = balsas.skaityk_teksta(self._txt_kelias)
+            self._failo_tekstas = balsas.skaityk_teksta(self._txt_kelias, K.LANG)
         return self._failo_tekstas
 
     def _tekstas_pakeistas(self):
@@ -664,9 +804,10 @@ class Langas(QWidget):
             self.teksto_info.setText('')
             return
         n = len(balsas.dalys(t))
-        dalys = {1: ''}.get(n, ' · %d mp3 failai' % n if n < 10 else ' · %d mp3 failų' % n)
-        info = '%s simb.%s · %s' % ('{:,}'.format(len(t)).replace(',', ' '), dalys,
-                                    trukmes_ivertis(t, self.greitis.value() / 100.0, self._pauze))
+        dalys = '' if n == 1 else ' · ' + K.kiek(n, 'mp3 failas')
+        info = K.t('%s simb.%s · %s') % ('{:,}'.format(len(t)).replace(',', ' '), dalys,
+                                         trukmes_ivertis(t, self.greitis.value() / 100.0,
+                                                         self._pauze))
         if self.is_failo() and self._txt_kelias:
             info = os.path.basename(self._txt_kelias) + ' — ' + info
         self.teksto_info.setText(info)
@@ -695,18 +836,25 @@ class Langas(QWidget):
     def _issaugok_nustatymus(self):
         try:
             os.makedirs(APLANKAS, exist_ok=True)
+            if self.balsas.currentData():
+                self._balsai[K.LANG] = self.balsas.currentData()
+            self._tarimai[K.LANG] = self._tarimas
+            # ⚠️ 'kalba' — iš sąrašo, ne K.LANG: perkuriant langą sąrašas jau rodo NAUJĄ kalbą,
+            # ir būtent ją turi rasti kitas paleidimas.
             with open(NUSTATYMAI, 'w', encoding='utf-8') as f:
-                json.dump({'kalba': self.kalba.currentData(), 'balsas': self.balsas.currentData(),
+                json.dump({'kalba': self.kalba.currentData(), 'balsai': self._balsai,
                            'greitis': self.greitis.value(), 'aplankas': self._aplankas,
                            'eq': self._eq, 'garsumas': self._garsumas, 'pauze': self._pauze,
                            'rezimas': 'failas' if self.is_failo() else 'langas'},
                           f, ensure_ascii=False, indent=1)
             with open(TARIMAS, 'w', encoding='utf-8') as f:
-                json.dump(self._tarimas, f, ensure_ascii=False, indent=1)
+                json.dump(self._tarimai, f, ensure_ascii=False, indent=1)
         except Exception:
             pass
 
-    def _rodyk_nustatymus(self):
+    def _rodyk_nustatymus(self, siusti=None):
+        """⚙. `siusti` — kalbos, kurių balsus pradėti siųsti iš karto (pirmas paleidimas,
+        „Parsisiųsti balsą…")."""
         self._stabdyk_groti()
         # Vienas langas visam programos gyvenimui: jis pats laiko savo reikšmes, o mygtukas,
         # kurį grotuvas perjunginėja, niekada neišnyksta po kojomis.
@@ -717,9 +865,13 @@ class Langas(QWidget):
             self._dialogas.klausyti.connect(
                 lambda: self._pavyzdys_paspaustas(self._dialogas.b_klausyti))
             self._dialogas.greitis_pakeistas.connect(self.greitis.setValue)
+            self._dialogas.balsai_pasikeite.connect(self._pritaikyk_balsa)
         self._dialogas.nustatyk_greiti(self.greitis.value())
+        if siusti:
+            self._dialogas.siusk(siusti)
         self._dialogas.exec()
         self._stabdyk_groti()
+        self._pritaikyk_balsa()
         self._issaugok_nustatymus()
 
     def _nustatymai_pakeisti(self):
@@ -744,7 +896,7 @@ class Langas(QWidget):
     def _uzdarymo_mygtukas(self, dlg):
         eilute = QHBoxLayout()
         eilute.addStretch(1)
-        b = QPushButton('Uždaryti')
+        b = QPushButton(K.t('Uždaryti'))
         b.clicked.connect(dlg.reject)
         eilute.addWidget(b)
         return eilute
@@ -753,7 +905,7 @@ class Langas(QWidget):
         """Apie... - logo, pavadinimas, aprašas, versija, autoriai, balsų kilmė ir licencijos
         (Ingutės licencija reikalauja nurodyti kilmę ir perduoti LICENSE-VOICE)."""
         dlg = QDialog(self)
-        dlg.setWindowTitle('Apie programą')
+        dlg.setWindowTitle(K.t('Apie programą'))
         lay = QVBoxLayout(dlg)
         lay.setContentsMargins(18, 16, 18, 14)
         lay.setSpacing(10)
@@ -768,25 +920,33 @@ class Langas(QWidget):
         pavadinimas = QLabel(PAVADINIMAS)
         pavadinimas.setStyleSheet('font-size: 18px; font-weight: bold; color: #ffffff;')
         info.addWidget(pavadinimas)
-        info.addWidget(QLabel('Tekstas į mp3 lietuvišku balsu, be interneto —\n'
-                              'tekstas niekur nesiunčiamas, viskas lieka kompiuteryje.'))
-        info.addWidget(QLabel('Versija %s' % VERSIJA))
+        info.addWidget(QLabel(K.t('Tekstas į mp3 lietuvių, rusų, anglų ar vokiečių balsu. Tekstas '
+                                  'niekur\nnesiunčiamas, viskas lieka kompiuteryje; į internetą '
+                                  'programa eina\ntik parsisiųsti balsų ir paspaudus „Klauskite '
+                                  'DI".')))
+        info.addWidget(QLabel(K.t('Versija %s') % VERSIJA))
         autoriai = QLabel('Robertas & Claude')
         autoriai.setStyleSheet('color: #8f8f8f;')
         info.addWidget(autoriai)
         # DI žymėjimas VIRŠUJE (ES DI akto 50 str., kaip Diktuoklėje).
-        di = QLabel('Sukurta naudojant DI: kodą rašė Claude, ikona — DI.\n'
-                    'Įgarsinti įrašai yra sintetiniai — mp3 faile tai pažymėta.')
+        di = QLabel(K.t('Sukurta naudojant DI: kodą rašė Claude, ikona — DI.\n'
+                        'Įgarsinti įrašai yra sintetiniai — mp3 faile tai pažymėta.'))
         di.setStyleSheet('color: #E8B84B; font-size: 12px;')
         info.addWidget(di)
         virsus.addLayout(info)
         lay.addLayout(virsus)
-        kilme = QLabel('Reginutė — mokyta iš LIEPA garsyno (CC BY 4.0)\n'
-                       'Ingutė — išaugo iš Reginutės modelio (NewGenLTU OpenRAIL-D, žr. LICENSE-VOICE)\n'
-                       'Varikliai — Piper (GPL-3.0), pedalboard (GPL-3.0)')
+        # Kilmė — iš balsų MODEL_CARD (Piper katalogas, tikrinta 2026-10-29).
+        kilme = QLabel(K.t('Reginutė — mokyta iš LIEPA garsyno (CC BY 4.0)\n'
+                           'Ingutė — išaugo iš Reginutės modelio (NewGenLTU OpenRAIL-D, žr. '
+                           'LICENSE-VOICE)\n'
+                           'Dmitri — OHF-Voice voice-datasets (CC0)\n'
+                           'Cori — LibriVox įrašai (vieša nuosavybė)\n'
+                           'Thorsten — Thorsten-Voice (CC0)\n'
+                           'Balsai parsisiunčiami iš Piper balsų katalogo (huggingface.co)\n'
+                           'Varikliai — Piper (GPL-3.0), pedalboard (GPL-3.0)'))
         kilme.setStyleSheet('color: #9a9a9a; font-size: 12px;')
         lay.addWidget(kilme)
-        nuoroda = QLabel('Kūrėjo puslapis: <a href="%s" style="color:#4f9cf7; '
+        nuoroda = QLabel(K.t('Kūrėjo puslapis:') + ' <a href="%s" style="color:#4f9cf7; '
                          'font-weight:bold;">GitHub</a>' % KUREJO_PUSLAPIS)
         nuoroda.setOpenExternalLinks(True)
         lay.addWidget(nuoroda)
@@ -796,13 +956,14 @@ class Langas(QWidget):
     def _rodyk_instrukcija(self):
         """README rodomas pačios programos lange su slinktimi — jokio Notepad, jokio tinklo."""
         try:
-            with open(README, encoding='utf-8', errors='replace') as f:
+            with open(README.get(K.LANG, README['lt']), encoding='utf-8', errors='replace') as f:
                 tekstas = f.read()
         except OSError as e:
-            QMessageBox.warning(self, 'Pagalba', 'Nepavyko atidaryti instrukcijos: %s' % e)
+            QMessageBox.warning(self, K.t('Pagalba'), K.t('Nepavyko atidaryti instrukcijos: %s')
+                                % e)
             return
         dlg = QDialog(self)
-        dlg.setWindowTitle('Instrukcija')
+        dlg.setWindowTitle(K.t('Instrukcija'))
         lay = QVBoxLayout(dlg)
         lay.setContentsMargins(14, 14, 14, 12)
         rodinys = QPlainTextEdit(tekstas)
@@ -817,10 +978,10 @@ class Langas(QWidget):
         """Atidaro claude.ai su paruoštu promptu. claude.ai/new?q= tik UŽPILDO laukelį —
         siunčia pats žmogus. Tinklas TIK čia."""
         dlg = QMessageBox(self)
-        dlg.setWindowTitle('Neradote atsakymo? Klauskite DI')
+        dlg.setWindowTitle(K.t('Neradote atsakymo? Klauskite DI'))
         if os.path.exists(IKONA):
             dlg.setIconPixmap(QIcon(IKONA).pixmap(64, 64))
-        dlg.setText(
+        dlg.setText(K.t(
             'Kas įvyks paspaudus OK:\n\n'
             '1. Atsidarys interneto naršyklė su DI padėjėjo claude.ai\n'
             '   puslapiu. Žinutės laukelyje jau bus įrašyta angliška\n'
@@ -832,34 +993,37 @@ class Langas(QWidget):
             '4. Jei DI atsakys angliškai — paprašykite: „atsakyk\n'
             '   lietuviškai".\n\n'
             'Pastaba: claude.ai gali paprašyti prisijungti (nemokama\n'
-            'paskyra). Niekas neišsiunčiama be jūsų rankos.')
+            'paskyra). Niekas neišsiunčiama be jūsų rankos.'))
         dlg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
-        dlg.button(QMessageBox.StandardButton.Cancel).setText('Atšaukti')
+        dlg.button(QMessageBox.StandardButton.Cancel).setText(K.t('Atšaukti'))
         if dlg.exec() != QMessageBox.StandardButton.Ok:
             return
         promptas = (
             'Please read %s first - it is the author\'s briefing about the app "Skaitykle"'
-            ' (Windows program that reads text aloud in a Lithuanian voice - Ingutė or'
-            ' Reginutė - and saves MP3: text pasted into the window or opened from .txt;'
-            ' a line "---" splits it into several MP3 files; speed slider, pronunciation'
-            ' list, 7-band equaliser in the gear menu; nothing leaves the PC). If that link'
-            ' does not open yet, the same file, AI_CONSULTANT_BRIEF.md, sits next to the'
-            ' program; ask me to paste it. Source: %s. Then answer my question in plain, human'
-            ' language, in the language I write in, no programmer jargon. My question: '
+            ' (Windows program that reads text aloud and saves MP3, in Lithuanian - Ingutė or'
+            ' Reginutė - Russian, English or German; voices are downloaded once per language'
+            ' from the Piper catalogue in the gear menu; text pasted into the window or opened'
+            ' from .txt; a line "---" splits it into several MP3 files; speed slider,'
+            ' pronunciation list, 7-band equaliser in the gear menu; the text never leaves the'
+            ' PC). If that link does not open yet, the same file, AI_CONSULTANT_BRIEF.md, sits'
+            ' next to the program; ask me to paste it. Source: %s. Then answer my question in'
+            ' plain, human language, in the language I write in, no programmer jargon.'
+            ' My question: '
             % (BRIEF_URL, KUREJO_PUSLAPIS))
         webbrowser.open('https://claude.ai/new?q=' + urllib.parse.quote(promptas))
 
     # ---- failai -----------------------------------------------------------------------
     def _atidaryk_txt(self):
-        kelias, _ = QFileDialog.getOpenFileName(self, 'Tekstas, kurį įgarsinti', self._aplankas,
-                                                'Tekstas (*.txt);;Visi failai (*)')
+        kelias, _ = QFileDialog.getOpenFileName(self, K.t('Tekstas, kurį įgarsinti'), self._aplankas,
+                                                K.t('Tekstas (*.txt);;Visi failai (*)'))
         if not kelias:
             return
         kelias = os.path.normpath(kelias)
         try:
-            tekstas = balsas.skaityk_teksta(kelias)
+            tekstas = balsas.skaityk_teksta(kelias, K.LANG)
         except OSError as e:
-            QMessageBox.warning(self, PAVADINIMAS, 'Nepavyko atidaryti:\n%s\n\n%s' % (kelias, e))
+            QMessageBox.warning(self, PAVADINIMAS, K.t('Nepavyko atidaryti:\n%s\n\n%s')
+                                % (kelias, e))
             return
         self._aplankas = os.path.dirname(kelias)
         self._txt_kelias = kelias
@@ -875,7 +1039,8 @@ class Langas(QWidget):
     def _rink_mp3(self):
         pradzia = self.mp3.text().strip() or os.path.join(
             self._aplankas, vardas_is_teksto(self.saltinio_tekstas(is_naujo=False)) + '.mp3')
-        kelias, _ = QFileDialog.getSaveFileName(self, 'Kur įrašyti mp3', pradzia, 'MP3 (*.mp3)')
+        kelias, _ = QFileDialog.getSaveFileName(self, K.t('Kur įrašyti mp3'), pradzia,
+                                                'MP3 (*.mp3)')
         if not kelias:
             return ''
         kelias = os.path.normpath(kelias)
@@ -889,21 +1054,23 @@ class Langas(QWidget):
     def _daryti_paspaustas(self):
         if self._thread is not None and self._ar_dirba(self._thread):
             self._worker.stop()
-            self._rodyk_busena('Atšaukiama…', GELTONA)
+            self._rodyk_busena(K.t('Atšaukiama…'), GELTONA)
             self.daryti.setEnabled(False)
             return
         if self.is_failo() and not self._txt_kelias:
-            QMessageBox.information(self, PAVADINIMAS, 'Pasirinkite .txt failą — arba pažymėkite '
-                                    '„Iš lango" ir įklijuokite tekstą.')
+            QMessageBox.information(self, PAVADINIMAS, K.t('Pasirinkite .txt failą — arba '
+                                                           'pažymėkite „Iš lango" ir įklijuokite '
+                                                           'tekstą.'))
             return
         try:
             dalys = balsas.dalys(self.saltinio_tekstas())
         except OSError as e:
-            QMessageBox.warning(self, PAVADINIMAS, 'Nepavyko perskaityti failo:\n%s\n\n%s'
+            QMessageBox.warning(self, PAVADINIMAS, K.t('Nepavyko perskaityti failo:\n%s\n\n%s')
                                 % (self._txt_kelias, e))
             return
         if not dalys:
-            QMessageBox.information(self, PAVADINIMAS, 'Nėra teksto, kurį būtų galima perskaityti.')
+            QMessageBox.information(self, PAVADINIMAS,
+                                    K.t('Nėra teksto, kurį būtų galima perskaityti.'))
             return
         mp3 = self.mp3.text().strip() or self._rink_mp3()
         if not mp3:
@@ -912,15 +1079,15 @@ class Langas(QWidget):
             mp3 += '.mp3'
             self.mp3.setText(mp3)
         if not os.path.isdir(os.path.dirname(os.path.abspath(mp3))):
-            QMessageBox.warning(self, PAVADINIMAS, 'Tokio aplanko nėra:\n%s'
+            QMessageBox.warning(self, PAVADINIMAS, K.t('Tokio aplanko nėra:\n%s')
                                 % os.path.dirname(os.path.abspath(mp3)))
             return
         keliai = daliu_keliai(os.path.abspath(mp3), len(dalys))
         svetimi = [k for k in keliai if os.path.exists(k)
                    and os.path.normcase(k) not in self._sukurti]
         if svetimi and QMessageBox.question(
-                self, PAVADINIMAS, 'Jau yra %s:\n%s\n\nPerrašyti?' % (
-                    'failas' if len(svetimi) == 1 else '%d failai' % len(svetimi),
+                self, PAVADINIMAS, K.t('Jau yra %s:\n%s\n\nPerrašyti?') % (
+                    K.kiek(len(svetimi), 'failas'),
                     '\n'.join(svetimi[:5]) + ('\n…' if len(svetimi) > 5 else ''))
         ) != QMessageBox.StandardButton.Yes:
             return
@@ -942,22 +1109,22 @@ class Langas(QWidget):
 
         for v in self._valdikliai:
             v.setEnabled(False)
-        self.daryti.setText('Atšaukti')
+        self.daryti.setText(K.t('Atšaukti'))
         self.juosta.setRange(0, 0)          # „dirba", kol neaišku, kiek pastraipų
-        self._rodyk_busena('Kraunamas balsas…', GELTONA)
+        self._rodyk_busena(K.t('Kraunamas balsas…'), GELTONA)
         self._thread.start()
 
     def _progresas(self, padaryta, is_viso):
         self.juosta.setRange(0, is_viso)
         self.juosta.setValue(padaryta)
-        self._rodyk_busena('Įgarsinta pastraipų: %d iš %d' % (padaryta, is_viso), GELTONA)
+        self._rodyk_busena(K.t('Įgarsinta pastraipų: %d iš %d') % (padaryta, is_viso), GELTONA)
 
     def _baigta(self, kaip, tekstas, sekundes, padaryti):
         for v in self._valdikliai:
             v.setEnabled(True)
         self._failo_eilute_pagal_rezima()      # kitaip po darbo užsidegtų neaktyvi eilutė
-        self.daryti.setEnabled(True)
-        self.daryti.setText('Daryti mp3')
+        self.daryti.setText(K.t('Daryti mp3'))
+        self._pritaikyk_balsa()                # „Daryti" ir ▸ — tik jei balsas yra
         self.juosta.setRange(0, 1)
         for k in padaryti:
             self._sukurti.add(os.path.normcase(k))
@@ -967,20 +1134,21 @@ class Langas(QWidget):
         v, m = divmod(m, 60)
         trukme = ('%d:%02d:%02d' % (v, m, s)) if v else ('%d:%02d' % (m, s))
         kas = (os.path.basename(padaryti[0]) if len(padaryti) == 1 else
-               '%d failai (%s … %s)' % (len(padaryti), os.path.basename(padaryti[0]),
-                                        os.path.basename(padaryti[-1])) if padaryti else '')
+               '%s (%s … %s)' % (K.kiek(len(padaryti), 'failas'), os.path.basename(padaryti[0]),
+                                 os.path.basename(padaryti[-1])) if padaryti else '')
         if kaip == 'gerai':
             self.juosta.setValue(1)
-            self._rodyk_busena('Paruošta: %s, iš viso %s. Paklausykite; nepatiko — pakeiskite '
-                               'greitį, balsą ar garsą (⚙) ir darykite iš naujo.' % (kas, trukme),
-                               ZALIA)
+            self._rodyk_busena(K.t('Paruošta: %s, iš viso %s. Paklausykite; nepatiko — pakeiskite '
+                                   'greitį, balsą ar garsą (⚙) ir darykite iš naujo.')
+                               % (kas, trukme), ZALIA)
         elif kaip == 'atsaukta':
             self.juosta.setValue(0)
-            self._rodyk_busena('Atšaukta.%s Nebaigto failo ankstesnė versija (jei buvo) '
-                               'nepaliesta.' % ((' Spėjo: %s.' % kas) if padaryti else ''), PILKA)
+            self._rodyk_busena(K.t('Atšaukta.%s Nebaigto failo ankstesnė versija (jei buvo) '
+                                   'nepaliesta.') % ((K.t(' Spėjo: %s.') % kas) if padaryti else ''),
+                               PILKA)
         else:
             self.juosta.setValue(0)
-            self._rodyk_busena('Nepavyko.', RAUDONA)
+            self._rodyk_busena(K.t('Nepavyko.'), RAUDONA)
             QMessageBox.warning(self, PAVADINIMAS, tekstas)
 
     # ---- pavyzdys (▸, dantračio ir žodynėlio „Pasiklausyti") ------------------------
@@ -1018,23 +1186,24 @@ class Langas(QWidget):
         self._pthread.finished.connect(self._pthread.deleteLater)
         self.daryti.setEnabled(False)
         mygtukas.setEnabled(False)
-        self._rodyk_busena('Ruošiamas pavyzdys…', GELTONA)
+        self._rodyk_busena(K.t('Ruošiamas pavyzdys…'), GELTONA)
         self._pthread.start()
 
     def _pavyzdys_paruostas(self, garsas_, daznis, klaida):
         mygtukas = self._laukia_mygtukas
         mygtukas.setEnabled(True)
-        self.daryti.setEnabled(True)
+        self._pritaikyk_balsa()
         if klaida:
-            self._rodyk_busena('Pavyzdžio paruošti nepavyko.', RAUDONA)
+            self._rodyk_busena(K.t('Pavyzdžio paruošti nepavyko.'), RAUDONA)
             QMessageBox.warning(self, PAVADINIMAS, klaida)
             return
         w = self._pworker
         self._pavyzdys = (w.raktas, w.greitis, w.tekstas, garsas_, daznis)
         if mygtukas.window() is not self and not mygtukas.window().isVisible():
-            self._rodyk_busena('Pavyzdys paruoštas.', PILKA)
+            self._rodyk_busena(K.t('Pavyzdys paruoštas.'), PILKA)
             return                  # dialogas jau uždarytas — negrojam „iš niekur"
-        self._rodyk_busena('Groja pavyzdys — garso nustatymus (⚙) galima keisti grojant.', ZALIA)
+        self._rodyk_busena(K.t('Groja pavyzdys — garso nustatymus (⚙) galima keisti grojant.'),
+                           ZALIA)
         self._pradek_groti(mygtukas, garsas_=garsas_, daznis=daznis)
 
     # ---- grojimas: vienas kelias ir failams, ir pavyzdžiui ----------------------------
@@ -1049,7 +1218,7 @@ class Langas(QWidget):
             failai = [mp3]
         if not failai:
             QMessageBox.information(self, PAVADINIMAS,
-                                    'Dar nėra ką klausyti — pirma spauskite „Daryti mp3".')
+                                    K.t('Dar nėra ką klausyti — pirma spauskite „Daryti mp3".'))
             return
         self._pradek_groti(self.klausyti, keliai=failai)
 
@@ -1062,7 +1231,7 @@ class Langas(QWidget):
                                           args=(keliai, garsas_, daznis, self._stabdyk_grojima),
                                           daemon=True)
         self._grojimas.start()
-        mygtukas.setText('■  Sustabdyti' if len(self._grojimo_tekstas) > 2 else '■')
+        mygtukas.setText(K.t('■  Sustabdyti') if len(self._grojimo_tekstas) > 2 else '■')
         self.daryti.setEnabled(False)
         self._laikmatis.start()
 
@@ -1115,10 +1284,29 @@ class Langas(QWidget):
             self._grojimo_mygtukas.setText(self._grojimo_tekstas)
         self._grojimo_mygtukas = None
         if self._thread is None or not self._ar_dirba(self._thread):
-            self.daryti.setEnabled(True)
+            self._pritaikyk_balsa()
         if self._grojimo_klaida:
             klaida, self._grojimo_klaida = self._grojimo_klaida, ''
-            QMessageBox.warning(self, PAVADINIMAS, 'Nepavyko paleisti garso.\n\n' + klaida)
+            QMessageBox.warning(self, PAVADINIMAS, K.t('Nepavyko paleisti garso.') + '\n\n'
+                                + klaida)
+
+    def pasiulyk_siusti(self, kalbos):
+        """Pirmas paleidimas: pažymėtų (ar Windows) kalbų balsų dar nėra — paklausiam VIENĄ kartą.
+        „Vėliau" — nieko baisaus: lange lieka „Parsisiųsti balsą…", o ⚙ — visos kalbos."""
+        eil = ['    %s — %d MB' % (K.VARDAI[k], balsas.kalbos_mb(k)) for k in kalbos]
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle(PAVADINIMAS)
+        if os.path.exists(IKONA):
+            dlg.setIconPixmap(QIcon(IKONA).pixmap(64, 64))
+        dlg.setText(K.t('Balsai parsisiunčiami vieną kartą — po to programa veikia be interneto.\n\n'
+                        'Parsisiųsti dabar?\n\n%s\n\nIš viso %d MB, iš Piper balsų katalogo '
+                        '(huggingface.co).')
+                    % ('\n'.join(eil), sum(balsas.kalbos_mb(k) for k in kalbos)))
+        taip = dlg.addButton(K.t('Parsisiųsti'), QMessageBox.ButtonRole.AcceptRole)
+        dlg.addButton(K.t('Vėliau'), QMessageBox.ButtonRole.RejectRole)
+        dlg.exec()
+        if dlg.clickedButton() is taip:
+            self._rodyk_nustatymus(kalbos)
 
     @staticmethod
     def _ar_dirba(gija):
@@ -1129,6 +1317,8 @@ class Langas(QWidget):
 
     def closeEvent(self, ivykis):
         self._stabdyk_groti()
+        if self._dialogas is not None:
+            self._dialogas.stabdyk_siuntima()
         if self._thread is not None and self._ar_dirba(self._thread):
             self._worker.stop()
             self._thread.quit()
@@ -1140,36 +1330,57 @@ class Langas(QWidget):
         super().closeEvent(ivykis)
 
 
-# Paketo egzaminas (PASAS „Laukia" 3e): tas pats kelias, kuriuo žmogus daro mp3, abiem balsais,
-# su sunkiomis vietomis — „15:25" (plėtiklis), „ORAI" (žodžių sąrašas iš PAKETO), ES/JAV
-# (santrumpos), `---` (dalys). Paleidžiama `Skaitykle.exe --egzaminas <katalogas>`; mp3 po to
-# klausosi mūsų ausys (lt_ausys) ir lyginama su šaltinių versija.
+# Paketo egzaminas (PASAS „Laukia" 3e): tas pats kelias, kuriuo žmogus daro mp3, visais
+# parsiųstais balsais, su sunkiomis vietomis — „15:25" (plėtiklis / espeak), „ORAI" (žodžių
+# sąrašas iš PAKETO), ES/JAV (santrumpos), `---` (dalys). Paleidžiama
+# `Skaitykle.exe --egzaminas <katalogas>`; mp3 po to klausosi ausys (LT — lt_ausys, RU — GigaAM).
+# Neparsiųstas balsas — ne klaida (žmogus galėjo jo nesirinkti), bet eilutėje matosi; prieš
+# leidimą egzaminas daromas su VISAIS balsais.
 EGZAMINO_TEKSTAS = ('Laba diena, studentai. Paskaita prasidės 15:25 val.\n\n'
                     'ORAI šiandien geri, o ES ir JAV mokslininkai sutaria. '
                     'Per metus augalai sugeria 120 tonų anglies.\n---\n'
                     'Fotosintezė vyksta žaliuose lapuose.')
+EGZAMINO_TEKSTAI = {
+    'lt': EGZAMINO_TEKSTAS,
+    'ru': ('Добрый день, студенты. Лекция начнётся в 15:25.\n\n'
+           'Учёные ЕС и США согласны. За год растения поглощают 120 тонн углерода.\n---\n'
+           'Фотосинтез происходит в зелёных листьях.'),
+    'en': ('Good afternoon, students. The lecture starts at 15:25.\n\n'
+           'Scientists in the EU and the USA agree. Every year plants absorb 120 tonnes of carbon.'
+           '\n---\nPhotosynthesis takes place in green leaves.'),
+    'de': ('Guten Tag, liebe Studierende. Die Vorlesung beginnt um 15:25 Uhr.\n\n'
+           'Forscher in der EU und den USA sind sich einig. Jedes Jahr nehmen Pflanzen 120 Tonnen '
+           'Kohlenstoff auf.\n---\nDie Fotosynthese findet in grünen Blättern statt.'),
+}
 
 
 def egzaminas(katalogas):
     os.makedirs(katalogas, exist_ok=True)
     problemos = balsas.savitikra()
     eil = ['Skaitykle %s egzaminas' % VERSIJA, 'programa: %s' % CIA,
+           'balsai: %s' % balsu_siuntimas.KATALOGAS,
            'savitikra: %s' % ('GERAI' if not problemos else '; '.join(problemos)),
            'zodziu sarasas: %d' % len(balsas.skaiciu_pletiklis._ZODZIU_SARASAS or ()),
            'pletiklis: %s' % balsas.isplesk(EGZAMINO_TEKSTAS.replace('\n', ' '))]
-    dalys = balsas.dalys(EGZAMINO_TEKSTAS)
-    visi_gerai = not problemos
-    for raktas in balsas.BALSAI:
-        keliai = daliu_keliai(os.path.join(katalogas, 'egz_%s.mp3' % raktas), len(dalys))
-        w = Darbininkas(raktas, 1.0, dalys, keliai, [0] * len(garsas.JUOSTOS),
-                        garsas.GARSUMAS_NUMATYTAS, garsas.PAUZE_NUMATYTA, [])
-        rez = []
-        w.baigta.connect(lambda *a: rez.append(a))
-        w.run()
-        kaip, klaida, sek, failai = rez[0] if rez else ('klaida', 'nebaigta', 0.0, [])
-        visi_gerai = visi_gerai and kaip == 'gerai'
-        eil.append('%s: %s %s %.2f s %s' % (raktas, kaip, klaida, sek,
-                                            [os.path.basename(f) for f in failai]))
+    visi_gerai, padaryta = not problemos, 0
+    for kalba_, (_, raktai) in balsas.KALBOS.items():
+        dalys = balsas.dalys(EGZAMINO_TEKSTAI[kalba_])
+        for raktas in raktai:
+            if not balsu_siuntimas.yra(raktas):
+                eil.append('%s: neparsiusta' % raktas)
+                continue
+            keliai = daliu_keliai(os.path.join(katalogas, 'egz_%s.mp3' % raktas), len(dalys))
+            w = Darbininkas(raktas, 1.0, dalys, keliai, [0] * len(garsas.JUOSTOS),
+                            garsas.GARSUMAS_NUMATYTAS, garsas.PAUZE_NUMATYTA, [])
+            rez = []
+            w.baigta.connect(lambda *a: rez.append(a))
+            w.run()
+            kaip, klaida, sek, failai = rez[0] if rez else ('klaida', 'nebaigta', 0.0, [])
+            visi_gerai = visi_gerai and kaip == 'gerai'
+            padaryta += 1
+            eil.append('%s: %s %s %.2f s %s' % (raktas, kaip, klaida, sek,
+                                                [os.path.basename(f) for f in failai]))
+    visi_gerai = visi_gerai and padaryta > 0
     eil.append('REZULTATAS: %s' % ('GERAI' if visi_gerai else 'BLOGAI'))
     with open(os.path.join(katalogas, 'egzaminas.txt'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(eil) + '\n')
@@ -1184,15 +1395,28 @@ def main():
     app.setApplicationName(PAVADINIMAS)
     if os.path.exists(IKONA):
         app.setWindowIcon(QIcon(IKONA))     # antraštės ikona pakete (PyInstaller IDI_ICON1 spąstas)
-    langas = Langas()
+    pirmas_kartas = not os.path.exists(NUSTATYMAI)
+    langas = Langas()                       # kalbą parenka pats (ir iš diegimo varnelių)
+    _LANGAI[:] = [langas]
     langas.show()
+    diegimas = skaityk_diegima()
+    try:
+        os.remove(DIEGIMAS)                 # vienkartinis — kitą kartą nebeklausiam
+    except OSError:
+        pass
     problemos = balsas.savitikra()
     if problemos:
-        langas._rodyk_busena('Programai trūksta dalių — įdiekite ją iš naujo.', RAUDONA)
+        langas._rodyk_busena(K.t('Programai trūksta dalių — įdiekite ją iš naujo.'), RAUDONA)
         langas.daryti.setEnabled(False)
         QMessageBox.critical(langas, PAVADINIMAS,
-                             'Programai trūksta dalių, todėl balsai neskambėtų taip, kaip turi:\n\n'
-                             + '\n'.join(problemos) + '\n\nĮdiekite Skaityklę iš naujo.')
+                             K.t('Programai trūksta dalių, todėl balsai neskambėtų taip, kaip '
+                                 'turi:') + '\n\n' + '\n'.join(problemos) + '\n\n'
+                             + K.t('Įdiekite Skaityklę iš naujo.'))
+    else:
+        siusti = [k for k in (diegimas or ([K.LANG] if pirmas_kartas else []))
+                  if not balsas.kalba_yra(k)]
+        if siusti:
+            QTimer.singleShot(300, lambda: _LANGAI[0].pasiulyk_siusti(siusti))
     sys.exit(app.exec())
 
 

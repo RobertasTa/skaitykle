@@ -19,14 +19,22 @@ not from memory.
 
 ## Voices
 
-| Voice | Licence | Origin |
-|---|---|---|
-| Reginutė (`lt_LT-reginute1-medium`) | CC BY 4.0 | learned from the LIEPA corpus |
-| Ingutė (`lt_LT-ingute-medium`) | NewGenLTU OpenRAIL-D — full text in [`skaitykle/balsai/LICENSE-VOICE-ingute`](skaitykle/balsai/LICENSE-VOICE-ingute) | grown from the Reginutė model with the authors' Python tools |
+Since 0.2 the installer contains no voice models: the program downloads the voices of the
+languages the user picks from the Piper voice catalogue (`rhasspy/piper-voices` on Hugging Face)
+and keeps a file only if its SHA256 matches the value in `skaitykle/balsu_siuntimas.py`. The
+voice settings (`skaitykle/balsai/*.onnx.json`) and Ingutė's licence are inside the program.
 
-Both voice files are identical to the ones in the Piper voice catalogue
-(`rhasspy/piper-voices`): SHA256 `0417c4ef…986ee` (Reginutė), `31bdf1df…41d8` (Ingutė).
-If you redistribute Ingutė, keep `LICENSE-VOICE` with it and state the origin.
+| Voice | Language | Data licence (MODEL_CARD, checked 2026-10-29) | Origin |
+|---|---|---|---|
+| Reginutė (`lt_LT-reginute1-medium`) | Lithuanian | CC BY 4.0 | learned from the LIEPA corpus |
+| Ingutė (`lt_LT-ingute-medium`) | Lithuanian | NewGenLTU OpenRAIL-D — full text in [`skaitykle/balsai/LICENSE-VOICE-ingute`](skaitykle/balsai/LICENSE-VOICE-ingute) | grown from the Reginutė model with the authors' Python tools |
+| Dmitri (`ru_RU-dmitri-medium`) | Russian | CC0 | OHF-Voice voice-datasets |
+| Cori (`en_GB-cori-medium`) | English | public domain | LibriVox recordings |
+| Thorsten (`de_DE-thorsten-medium`) | German | CC0 | Thorsten-Voice |
+
+Voices whose data licence forbids commercial use or limits it to research (for example Ruslan,
+Lessac, Ryan) were left out on purpose. If you redistribute Ingutė, keep `LICENSE-VOICE` with it
+and state the origin.
 
 ## Lithuanian text processing
 

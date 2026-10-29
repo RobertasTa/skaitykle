@@ -2,7 +2,7 @@
 
 ![Skaityklė — a robotic hand holds a gift box marked with a document and sound waves (illustration created with AI)](docs/banner.png)
 
-**Paste text or open a .txt file and get an MP3 read in a natural Lithuanian voice. Everything runs on your own computer — free, offline, no account.**
+**Paste text or open a .txt file and get an MP3 read in a natural Lithuanian voice. Since 0.2 also Russian, English and German. Everything runs on your own computer, free and with no account; the internet is needed once, to download the voices.**
 
 *Lietuviškai: [README.md](README.md)*
 
@@ -24,13 +24,14 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 
 ## What it does
 
-- **Two Lithuanian voices** — **Ingutė** and **Reginutė**, both from the official [Piper](https://github.com/OHF-Voice/piper1-gpl) voice catalogue. ▸ plays a sample first.
+- **Four languages** — Lithuanian (**Ingutė** and **Reginutė**), Russian (**Dmitri**), English (**Cori**), German (**Thorsten**); all voices come from the official [Piper](https://github.com/OHF-Voice/piper1-gpl) voice catalogue. Picking a language also switches the whole window to it. ▸ plays a sample first.
+- **Voices only for the languages you need.** Tick them during installation; add others at any time in ⚙ → "Languages and voices".
 - **Speed slider**, ↺ back to the voice's own rate.
 - **From a file or from the window** — a .txt file (old Windows encodings too) or pasted / typed text.
 - **Pronunciation list** — *written → spoken* for terms and names, with preview.
 - **Equaliser** (⚙) — seven bands, volume and the pause between paragraphs in seconds; the sliders work while the sample plays. The speed slider is there too: move it while the sample plays and the sample is remade at the new speed.
 - **Select a piece of text and press ▸** to hear just that.
-- **Numbers and abbreviations** are expanded into words (dates are still read as plain numbers — see "Limits").
+- **In Lithuanian, numbers and abbreviations** are expanded into words (dates are still read as plain numbers — see "Limits"). In the other languages the voice reads numbers itself.
 
 ![Sound settings (⚙): seven-band equaliser from 125 Hz to 8 kHz, speed 1.17×, volume +6 dB, pause between paragraphs 1.3 s, "Pasiklausyti" (listen) button](docs/ekvalaizeris.png)
 
@@ -38,18 +39,21 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 
 ## Download
 
-**[Skaitykle-0.1.1-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — about 190 MB, Windows 10/11 (64-bit). Installs into your user profile, no administrator rights. The voices are inside — nothing else to download.
+**[Skaitykle-0.2.0-setup.exe](https://github.com/RobertasTa/skaitykle/releases/latest)** — about 80 MB, Windows 10/11 (64-bit). Installs into your user profile, no administrator rights. During installation you tick the languages you want; on first start the program offers to download their voices (Lithuanian 128 MB, the others 64 MB each) from the Piper voice catalogue and checks every file against its SHA256. After that it works offline. Updating from 0.1 keeps the Lithuanian voices you already have.
 
 ⚠️ **Windows will show a blue "Windows protected your PC" screen.** It is not malware: the installer has no paid code-signing certificate, so SmartScreen does not know the publisher. Click **"More info" → "Run anyway"**. The sha256 of the file is on the Release page.
 
-The program's interface is in Lithuanian — it is a tool for Lithuanian text.
+The window speaks the language you pick: Lithuanian, Russian, English or German.
 
 ## Voices
 
 - **Reginutė** — learned from the LIEPA corpus, licence **CC BY 4.0**.
 - **Ingutė** — grown from the Reginutė model with the authors' Python tools. Licence **NewGenLTU OpenRAIL-D**: free to use, no charge, commercial use not forbidden; when passing it on, include [`LICENSE-VOICE`](skaitykle/balsai/LICENSE-VOICE-ingute) and state the origin.
+- **Dmitri** (Russian) — recordings from OHF-Voice voice-datasets, **CC0**.
+- **Cori** (English) — LibriVox recordings, **public domain**.
+- **Thorsten** (German) — Thorsten-Voice, **CC0**.
 
-The program itself shows the voices' origin and licences under **"?" → "Apie..."** (About), and its manual under **"?" → "Instrukcija"**; **"?" → "Klauskite DI"** opens claude.ai with a ready-made introduction, only after you press OK.
+The Russian, English and German voices were chosen for the licence of their recordings: CC0 or public domain only. The program itself shows the voices' origin and licences under **"?" → "Apie..."** (About), and its manual under **"?" → "Instrukcija"**; **"?" → "Klauskite DI"** opens claude.ai with a ready-made introduction, only after you press OK.
 
 ![About window: Skaityklė 0.1.1, AI disclosure, voice origin and licences](docs/apie.png)
 
@@ -57,7 +61,8 @@ The program itself shows the voices' origin and licences under **"?" → "Apie..
 
 - **Dates** are read as plain numbers; "mlrd." and "°C" are not expanded. Write them out in words or add them to the pronunciation list.
 - Reads **.txt files and pasted text only** (text copied out of Word, PDF or PowerPoint is fine).
-- **Lithuanian only, female voices only**; Windows only.
+- The program's own reading recipe (stress dictionary, numbers in words) is **for Lithuanian only**. The Russian, English and German voices read the way Piper taught them: they say numbers themselves, and Russian case endings of numbers are not always right.
+- Windows only.
 - It is a **synthetic voice** — natural, but not a person.
 
 ## Licence
@@ -66,6 +71,6 @@ The program itself shows the voices' origin and licences under **"?" → "Apie..
 
 ## Thanks
 
-[Piper](https://github.com/OHF-Voice/piper1-gpl) and Michael Hansen for the engine and the voice catalogue; the creators of the LIEPA corpus; Spotify for [pedalboard](https://github.com/spotify/pedalboard); the espeak-ng, Qt / PyQt6, ONNX Runtime, libsndfile and LAME projects.
+[Piper](https://github.com/OHF-Voice/piper1-gpl) and Michael Hansen for the engine and the voice catalogue; the creators of the LIEPA corpus; Nabu Casa for the Dmitri recordings, Thorsten Müller for Thorsten-Voice, Bryce Beattie and the LibriVox readers for Cori; Spotify for [pedalboard](https://github.com/spotify/pedalboard); the espeak-ng, Qt / PyQt6, ONNX Runtime, libsndfile and LAME projects.
 
 Questions and feedback — [Issues](https://github.com/RobertasTa/skaitykle/issues).

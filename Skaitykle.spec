@@ -19,10 +19,22 @@ ieskoti TIK savo kataloge. Todel:
 
 SPRENDIMAI (paveldeti): ONEDIR (ne onefile), UPX isjungtas (antivirusai), console=False
 (apsauga `main.py` `_uzkaisk_isvesti()` — guard Rule 8).
+
+NUO 0.2 (2026-10-29): balsu `.onnx` PAKETE NERA — jie parsisiunciami pagal kalbas
+(`balsu_siuntimas.py`, SHA256 kode). Pakete — VISU balsu `.onnx.json` (be ju parsiustas balsas
+neuzsikrautu), Ingutes LICENSE-VOICE, keturios instrukcijos ir kalbu zodynai `kalba_*.py`
+(⛔ jie importuojami per `__import__` — be `hiddenimports` PyInstaller ju NEMATO, sasaja liktu
+lietuviska be jokios klaidos).
 """
+import glob
+
 from PyInstaller.utils.hooks import collect_all
 
 KATALOGAS = "skaitykle"
+# Tik konfigai ir licencija — ne `balsai\\` visas: saltiniu kataloge guli ir .onnx (kurejo kopija).
+BALSU_FAILAI = [(f, "balsai") for f in glob.glob(f"{KATALOGAS}/balsai/*.onnx.json")] + [
+    (f"{KATALOGAS}/balsai/LICENSE-VOICE-ingute", "balsai")]
+INSTRUKCIJOS = [(f, ".") for f in glob.glob(f"{KATALOGAS}/README*.txt")]
 
 piper_d, piper_b, piper_h = collect_all("piper")
 ort_d, ort_b, ort_h = collect_all("onnxruntime")
@@ -36,13 +48,12 @@ a = Analysis(
     binaries=piper_b + ort_b + pb_b + sd_b + sf_b,
     datas=[
         (f"{KATALOGAS}/Skaitykle.ico", "."),
-        (f"{KATALOGAS}/README.txt", "."),
         # „?" → „Klauskite DI": promptas sako, kad brief'as guli šalia programos.
         ("AI_CONSULTANT_BRIEF.md", "."),
-        (f"{KATALOGAS}/balsai", "balsai"),
         (f"{KATALOGAS}/lietuviskai", "lietuviskai"),
-    ] + piper_d + ort_d + pb_d + sd_d + sf_d,
-    hiddenimports=(["balsas", "garsas", "dantratis", "tarimas",
+    ] + INSTRUKCIJOS + BALSU_FAILAI + piper_d + ort_d + pb_d + sd_d + sf_d,
+    hiddenimports=(["balsas", "balsu_siuntimas", "garsas", "dantratis", "tarimas", "kalba",
+                    "kalba_en", "kalba_ru", "kalba_de",
                     "lietuviskai.phonemize_lithuanian", "lietuviskai.skaiciu_pletiklis",
                     "lietuviskai.synth_reginute", "pedalboard_native"]
                    + piper_h + ort_h + pb_h + sd_h + sf_h),

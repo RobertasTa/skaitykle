@@ -8,10 +8,15 @@ skamba geriausiai, išbandyta 09-03). Šalia — perklausa, kad nereikėtų dary
 
 Langas pats negroja ir nesaugo — kaip dantratis: praneša `klausyti(tekstas)`, o saugo ir groja
 pagrindinis langas.
+
+Nuo 0.2 (10-29) žodynėlis — KIEKVIENAI KALBAI savas (main.py laiko {kalba: poros}): lietuviška
+„Hom Asistent" angliškam balsui būtų klaida.
 """
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (QAbstractItemView, QDialog, QHBoxLayout, QHeaderView, QLabel,
                              QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout)
+
+import kalba as K
 
 
 class TarimoZodynas(QDialog):
@@ -19,34 +24,35 @@ class TarimoZodynas(QDialog):
 
     def __init__(self, tevas, poros):
         super().__init__(tevas)
-        self.setWindowTitle('Tarimo žodynėlis')
+        self.setWindowTitle(K.t('Tarimo žodynėlis'))
         self.setStyleSheet(tevas.styleSheet())
         self.resize(560, 420)
 
-        antraste = QLabel('Tarimo žodynėlis')
+        antraste = QLabel(K.t('Tarimo žodynėlis') + ' — ' + K.VARDAI[K.LANG])
         antraste.setObjectName('antraste')
-        uzuomina = QLabel('Kairėje — kaip parašyta tekste, dešinėje — kaip turi skambėti, pvz. '
-                          '„Home Assistant" → „Hom Asistent". Galioja ištisiems žodžiams, didžiosios '
-                          'raidės nesvarbu. Pažymėkite eilutę ir spauskite ▸ — išgirsite, kaip skamba.')
+        uzuomina = QLabel(K.t('Kairėje — kaip parašyta tekste, dešinėje — kaip turi skambėti, pvz. '
+                              '„Home Assistant" → „Hom Asistent". Galioja ištisiems žodžiams, '
+                              'didžiosios raidės nesvarbu. Pažymėkite eilutę ir spauskite ▸ — '
+                              'išgirsite, kaip skamba.'))
         uzuomina.setObjectName('uzuomina')
         uzuomina.setWordWrap(True)
 
         self.lentele = QTableWidget(0, 2)
-        self.lentele.setHorizontalHeaderLabels(['Rašoma', 'Tariama'])
+        self.lentele.setHorizontalHeaderLabels([K.t('Rašoma'), K.t('Tariama')])
         self.lentele.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.lentele.verticalHeader().setVisible(False)
         self.lentele.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         for rasoma, tariama in poros:
             self._prideti(rasoma, tariama)
 
-        b_prideti = QPushButton('Pridėti')
+        b_prideti = QPushButton(K.t('Pridėti'))
         b_prideti.clicked.connect(self._nauja_eilute)
-        b_salinti = QPushButton('Pašalinti')
+        b_salinti = QPushButton(K.t('Pašalinti'))
         b_salinti.clicked.connect(self._salinti)
-        self.b_klausyti = QPushButton('▸  Pasiklausyti')
+        self.b_klausyti = QPushButton(K.t('▸  Pasiklausyti'))
         self.b_klausyti.setProperty('aktyvus', 'taip')
         self.b_klausyti.clicked.connect(self._klausyti)
-        b_uzdaryti = QPushButton('Uždaryti')
+        b_uzdaryti = QPushButton(K.t('Uždaryti'))
         b_uzdaryti.clicked.connect(self.accept)
         for b in (b_prideti, b_salinti, self.b_klausyti, b_uzdaryti):
             b.setFocusPolicy(Qt.FocusPolicy.NoFocus)

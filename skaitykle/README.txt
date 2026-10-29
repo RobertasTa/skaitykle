@@ -2,16 +2,20 @@ SKAITYKLĖ — tekstas į mp3 lietuvišku balsu
 ==========================================
 
 Programa perskaito tekstą pasirinktu balsu ir įrašo mp3. Tinka ir skaidrių
-komentarams, ir visai knygai. Viskas vyksta jūsų kompiuteryje: be interneto,
-be paskyros, be vaizdo plokštės. Tekstas niekur nesiunčiamas.
+komentarams, ir visai knygai. Viskas vyksta jūsų kompiuteryje: be paskyros,
+be vaizdo plokštės. Tekstas niekur nesiunčiamas. Internetas reikalingas tik
+vieną kartą — parsisiųsti pasirinktos kalbos balsus.
 
 
 KAIP NAUDOTI
 ------------
 
 1. Kalba ir Balsas
-   Pasirinkite balsą: Ingutė arba Reginutė. Mygtukas ▸ šalia leidžia
+   Kalbos: lietuvių, rusų, anglų, vokiečių. Pakeitus kalbą, persijungia ir
+   visas programos langas. Lietuvių balsai — Ingutė ir Reginutė, rusų —
+   Dmitri, anglų — Cori, vokiečių — Thorsten. Mygtukas ▸ šalia leidžia
    pasiklausyti, kaip balsas skamba su dabartiniais nustatymais.
+   Jei kalbos balsų dar nėra, šalia atsiranda „Parsisiųsti balsą…".
 
 2. Greitis
    Slankiklis: į kairę — lėčiau, į dešinę — greičiau. 1,00× yra balso
@@ -79,6 +83,12 @@ Pauzė tarp pastraipų — tyla sekundėmis. Skaidrėms dažnai patogu ilgesnė.
 „Atstatyti" grąžina numatytuosius: lygus ekvalaizeris, garsumas +6 dB,
 pauzė 1,3 s.
 
+Kalbos ir balsai — kiekvienos kalbos balsai parsisiunčiami vieną kartą iš
+Piper balsų katalogo (huggingface.co): lietuvių 128 MB, kitų po 64 MB.
+Parsiųstas balsas patikrinamas (SHA256) — sugadintas ar nebaigtas failas
+neišsaugomas. Diegimo metu pažymėtas kalbas programa pasiūlo parsisiųsti
+pirmą kartą paleista; kitas — bet kada čia.
+
 
 KIEK UŽTRUKS
 ------------
@@ -107,6 +117,8 @@ KAI KAS NEPAVYKSTA
   Uždarykite grotuvą ir spauskite dar kartą.
 * „Nepavyko paleisti garso" — patikrinkite, ar Windows garsas veikia ir
   neišjungtas.
+* „Nepavyko parsisiųsti balsų" — patikrinkite interneto ryšį ir spauskite
+  „Parsisiųsti" dar kartą (⚙ → Kalbos ir balsai).
 * Kitais atvejais: ? → „Neradote atsakymo? Klauskite DI".
 
 

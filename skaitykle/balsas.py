@@ -16,22 +16,28 @@ Paimta iš SpeakDream `vertejas\\balsas.py` + `lietuviskai\\`, ne parašyta iš 
 Balsų failai guli šalia (`balsai\\`), SHA256 sutampa su Piper katalogu (2026-10-28):
 Reginutė `0417c4ef…986ee`, Ingutė `31bdf1df…41d8`. Konfigai — mūsų `espeak` kopijos, nes
 piper-tts 1.8.0 `phoneme_type: lithuanian` dar nežino.
+
+NUO 0.2 (2026-10-29) — keturios kalbos: LT, RU, EN, DE. Balsų `.onnx` parsisiunčiami pagal poreikį
+(`balsu_siuntimas.py`), o konfigai, tempai ir garsumo sulyginimas lieka čia. Rusų, anglų ir
+vokiečių tekstą balsas taria per Piper `espeak` kelią (skaičius skaito pats espeak); lietuvių
+receptas, kirčiai ir plėtiklis — tik lietuviams.
 """
-import hashlib
 import json
 import os
 import re
 
 import numpy as np
-from piper import PiperVoice
+from piper import PiperVoice, SynthesisConfig
 
 CIA = os.path.dirname(os.path.abspath(__file__))
 LT = os.path.join(CIA, 'lietuviskai')
 
+import balsu_siuntimas
+import kalba as K
 from lietuviskai import skaiciu_pletiklis
 from lietuviskai.phonemize_lithuanian import LithuanianPhonemizer
 from lietuviskai.skaiciu_pletiklis import isplesk
-from lietuviskai.synth_reginute import ReginuteSynth
+from lietuviskai.synth_reginute import ReginuteSynth, nukirpk_tyla
 
 # ⛔ Programa ieško TIK savo kataloge (Roberto 10-28: „ieško savo programos kataloge, o ne pas
 # mešką ieškotis kompe"). Vienintelis kietas kelias — `skaiciu_pletiklis._yra_tikras_zodis`:
@@ -51,56 +57,103 @@ try:
 except OSError:
     pass            # savitikra() tai praneš žmogui aiškiai — nekrentam importo metu
 
-# Balsų failai = Piper katalogo failai (SHA256 sutikrinta 2026-10-28). Kitoks failas = kitas
-# balsas arba sugadintas paketas — geriau aiški klaida, nei „balsas skamba blogai".
-SHA256 = {
-    'lt_LT-reginute1-medium.onnx': '0417c4ef351686ec0b0e7bf63426aefc72faea4a7693cfcb2f01ea8f6ee986ee',
-    'lt_LT-ingute-medium.onnx': '31bdf1df5339e7da0e0f8c8e847e0f9e720bb732c0ffc7fb3d81970844b441d8',
+# raktas: (rodomas vardas, kalba, bazinis tempas `length_scale`, garsumo sulyginimas)
+# Tempai: Reginutės receptas išmatuotas ant diktorės (1,30); Ingutės 1,15 — aklas pasirinkimas
+# iš trijų (09-16); kitų — Piper numatytasis 1,0. Sulyginimas — į visų balsų LUFS medianą
+# (−24,35, SpeakDream 09-18); naujieji keturi pamatuoti 10-29 tuo pačiu būdu ant vieno paskaitos
+# teksto (`balsu_perklausa.py` scratchpad'e). Lessac ir Ruslano NĖRA dėl licencijų (PASAS 11).
+BALSAI = {
+    'lt_LT-ingute-medium': ('Ingutė', 'lt', 1.15, 1.05),
+    'lt_LT-reginute1-medium': ('Reginutė', 'lt', 1.30, 0.51),
+    'ru_RU-dmitri-medium': ('Dmitri', 'ru', 1.0, 0.91),     # Roberto pasirinkimas 10-29 (ne Denis)
+    'en_GB-cori-medium': ('Cori', 'en', 1.0, 1.31),
+    'de_DE-thorsten-medium': ('Thorsten', 'de', 1.0, 0.98),
 }
-BUTINI = (['balsai/' + f for f in SHA256] + ['balsai/%s.json' % f for f in SHA256]
+
+# „HA" (Home Assistant) Reginutė sakydavo kaip varna — „KAAA" (Roberto ausis 10-29). Kaltas ne [h], o
+# DVIEJŲ VIENODŲ BALSIŲ sandūra raidžių vardų virtinėje: „ha" + „a" modelis sulieja į vieną
+# girgždantį „aaa". Pamatuota lt_ausys, po 8 kartus: dabar „ha" girdi 1/8 („cha" 4, „ką" 2);
+# [h]→[ɣ] 0/8 („ką" 7); raidės atskirai („ha - a", recepto 0,1 s pauzė) — 6/8 (+„hha a" 1).
+# Ingutė „HA A" taria gerai — jai nekeičiam. Kitos santrumpos (ES, LRT…) — kaip buvo.
+ATSKIRTI_VIENODUS_BALSIUS = {'lt_LT-reginute1-medium'}
+_RAIDZIU_VARDAI = sorted(set(skaiciu_pletiklis.RAIDZIU_VARDAI.values()), key=len, reverse=True)
+_BALSES = 'aąeęėiįyouųū'
+
+
+def atskirk_vienodus_balsius(tekstas):
+    """Plėtiklio raidžių santrumpose („ - ha a - ") tarp dviejų raidžių vardų, kai pirmas
+    baigiasi, o antras prasideda TUO PAČIU balsiu, įterpia „ - " (recepte — 0,1 s pauzė).
+    Liečia tik tarpus, kurie VISI sudaryti iš raidžių vardų; paprastas tekstas su brūkšniais
+    lieka nepaliestas."""
+    def raides(m):
+        likutis, vardai = m.group(1).strip(), []
+        while likutis:
+            v = next((v for v in _RAIDZIU_VARDAI
+                      if likutis == v or likutis.startswith(v + ' ')), None)
+            if v is None:
+                return m.group(0)
+            vardai.append(v)
+            likutis = likutis[len(v):].strip()
+        out = vardai[:1]
+        for a, b in zip(vardai, vardai[1:]):
+            if a[-1] in _BALSES and b[0] == a[-1]:
+                out.append('-')
+            out.append(b)
+        return ' - %s - ' % ' '.join(out)
+    return re.sub(r' - ([^-]+?) - ', raides, ' %s ' % tekstas)[1:-1]
+
+
+# Kalba → (vardas SAVO kalba, jos balsai). Paketas = visi kalbos balsai, siunčiami kartu.
+KALBOS = {
+    'lt': ('Lietuvių', ['lt_LT-ingute-medium', 'lt_LT-reginute1-medium']),
+    'ru': ('Русский', ['ru_RU-dmitri-medium']),
+    'en': ('English', ['en_GB-cori-medium']),
+    'de': ('Deutsch', ['de_DE-thorsten-medium']),
+}
+
+# Programos viduje turi būti VISŲ balsų konfigai (net neparsiųstų — kad parsiuntus nieko nereikėtų
+# atspėti) ir lietuviški žodynai. Patys `.onnx` čia netikrinami: jų gali nebūti, o maiša
+# tikrinama kraunant balsą (`balsu_siuntimas.patikrintas_kelias`).
+BUTINI = (['balsai/%s.onnx.json' % r for r in BALSAI]
           + ['balsai/LICENSE-VOICE-ingute', 'lietuviskai/lt_kirciai.tsv',
              'lietuviskai/lt_raides.tsv', 'lietuviskai/lt_kreipiniai.tsv',
              'lietuviskai/zodziai_trumpi.txt'])
 
 
-def savitikra(su_sha=True):
+def savitikra():
     """Ar programa turi VISKĄ, ko reikia, kad balsai skambėtų taip, kaip išmatuota.
     Grąžina problemų sąrašą (tuščias — viskas gerai). Roberto reikalavimas 10-28: „kad
     nesigautų, jog kažkoks parametras ne taip įsikrovė, ir paskui verks, kad skamba blogai"."""
     problemos = []
     for f in BUTINI:
         if not os.path.isfile(os.path.join(CIA, *f.split('/'))):
-            problemos.append('Trūksta failo: %s' % f)
+            problemos.append(K.t('Trūksta failo: %s') % f)
     if problemos:
         return problemos
-    for onnx, tikras in SHA256.items():
-        k = json.load(open(os.path.join(CIA, 'balsai', onnx + '.json'), encoding='utf-8'))
+    for raktas in BALSAI:
+        k = json.load(open(os.path.join(CIA, 'balsai', raktas + '.onnx.json'), encoding='utf-8'))
         if k.get('phoneme_type') != 'espeak' or k.get('audio', {}).get('sample_rate') != 22050:
-            problemos.append('Netinkami balso nustatymai: %s.json' % onnx)
-        if su_sha:
-            h = hashlib.sha256()
-            with open(os.path.join(CIA, 'balsai', onnx), 'rb') as f:
-                for gabalas in iter(lambda: f.read(1 << 20), b''):
-                    h.update(gabalas)
-            if h.hexdigest() != tikras:
-                problemos.append('Balso failas pakeistas ar sugadintas: %s' % onnx)
+            problemos.append(K.t('Netinkami balso nustatymai: %s') % (raktas + '.onnx.json'))
     if len(skaiciu_pletiklis._ZODZIU_SARASAS or ()) < 30000:
-        problemos.append('Žodžių sąrašas neįkeltas iš programos katalogo')
+        problemos.append(K.t('Žodžių sąrašas neįkeltas iš programos katalogo'))
     if not skaiciu_pletiklis._yra_tikras_zodis('ORAI'):
-        problemos.append('Didžiosiomis rašyti žodžiai būtų skaitomi raidėmis')
+        problemos.append(K.t('Didžiosiomis rašyti žodžiai būtų skaitomi raidėmis'))
     return problemos
 
-# raktas: (rodomas vardas, bazinis tempas `length_scale`, garsumo sulyginimas)
-# Tempai: Reginutės receptas išmatuotas ant diktorės (1,30); Ingutės 1,15 — aklas pasirinkimas
-# iš trijų (09-16). Sulyginimas — SpeakDream matavimas į LUFS medianą (09-18).
-BALSAI = {
-    'lt_LT-ingute-medium': ('Ingutė', 1.15, 1.05),
-    'lt_LT-reginute1-medium': ('Reginutė', 1.30, 0.51),
-}
 
-# Langas ateičiai paruoštas kelioms kalboms (Robertas 10-28: „pirma versija tik lietuvių, bet
-# GUI gali paruošti iš anksto"): kalba → jos balsai. Nauja kalba = nauja eilutė čia.
-KALBOS = {'lt': ('Lietuvių', ['lt_LT-ingute-medium', 'lt_LT-reginute1-medium'])}
+def kalbos_mb(kalba):
+    """Kiek megabaitų sveria kalbos paketas (žmogui, apvalinta į didesnę pusę)."""
+    return -(-sum(balsu_siuntimas.FAILAI[r][2] for r in KALBOS[kalba][1]) // 1000000)
+
+
+def kalba_yra(kalba):
+    """Ar visi kalbos balsai parsiųsti (dydžio patikra — pigi; maiša — kraunant)."""
+    return all(balsu_siuntimas.yra(r) for r in KALBOS[kalba][1])
+
+
+class BalsoNera(Exception):
+    """Balsas neparsiųstas arba jo failas sugadintas — žinutė jau išversta žmogui."""
+
 
 ILGIAUSIAS_GABALAS = 400    # simbolių be skyrybos ženklo, žr. `_apsauga_ilgiems`
 
@@ -108,22 +161,44 @@ _kesas = {}
 
 
 def _ikrauk(raktas):
-    """Modelis + fonemizatorius krauname vieną kartą (~2 s) ir laikom."""
+    """Modelis (+ lietuviams fonemizatorius) krauname vieną kartą (~2 s) ir laikom."""
     if raktas not in _kesas:
-        voice = PiperVoice.load(os.path.join(CIA, 'balsai', raktas + '.onnx'),
-                                os.path.join(CIA, 'balsai', raktas + '.onnx.json'))
-        fonemos = LithuanianPhonemizer(
-            dictionary_path=os.path.join(LT, 'lt_kirciai.tsv'),
-            letters_path=os.path.join(LT, 'lt_raides.tsv'),
-            vocatives_path=os.path.join(LT, 'lt_kreipiniai.tsv'),
-            expand_text=None)       # plečia receptas — PRIEŠ skaidymą ties skyryba
+        vardas = BALSAI[raktas][0]
+        if not balsu_siuntimas.yra(raktas):
+            raise BalsoNera(K.t('Balsas „%s" dar neparsisiųstas. Parsisiųskite jį: ⚙ → '
+                              'Kalbos ir balsai.') % vardas)
+        kelias = balsu_siuntimas.patikrintas_kelias(raktas)
+        if kelias is None:
+            # Sugadintą PARSIŲSTĄ failą ištrinam — kitaip jo dydis tinka, ir ⚙ rodytų
+            # „parsisiųsta" be mygtuko iš naujo. Programos kataloge esančio neliečiam.
+            sugadintas = balsu_siuntimas.kelias(raktas)
+            if sugadintas and os.path.dirname(sugadintas) == balsu_siuntimas.KATALOGAS:
+                try:
+                    os.remove(sugadintas)
+                except OSError:
+                    pass
+            raise BalsoNera(K.t('Balso „%s" failas sugadintas. Parsisiųskite jį iš naujo: ⚙ → '
+                              'Kalbos ir balsai.') % vardas)
+        voice = PiperVoice.load(kelias, os.path.join(CIA, 'balsai', raktas + '.onnx.json'))
+        fonemos = None
+        if BALSAI[raktas][1] == 'lt':
+            fonemos = LithuanianPhonemizer(
+                dictionary_path=os.path.join(LT, 'lt_kirciai.tsv'),
+                letters_path=os.path.join(LT, 'lt_raides.tsv'),
+                vocatives_path=os.path.join(LT, 'lt_kreipiniai.tsv'),
+                expand_text=None)       # plečia receptas — PRIEŠ skaidymą ties skyryba
         _kesas[raktas] = (voice, fonemos)
     return _kesas[raktas]
 
 
-def skaityk_teksta(kelias):
+# Senų txt failų koduotė pagal kalbą: Windows „ANSI" lietuviams cp1257, rusams cp1251,
+# vokiečiams ir anglams cp1252. UTF-8 ir UTF-16 atpažįstami visada.
+SENA_KODUOTE = {'lt': 'cp1257', 'ru': 'cp1251', 'en': 'cp1252', 'de': 'cp1252'}
+
+
+def skaityk_teksta(kelias, kalba='lt'):
     """txt failas → tekstas. Mokytojų failai būna trijų rūšių: UTF-8 (su BOM ar be),
-    „Unicode" iš Notepad (UTF-16) ir senas Windows baltiškas cp1257."""
+    „Unicode" iš Notepad (UTF-16) ir senas Windows „ANSI" (cp1257 baltiškas ir t. t.)."""
     with open(kelias, 'rb') as f:
         b = f.read()
     if b.startswith(b'\xff\xfe') or b.startswith(b'\xfe\xff'):
@@ -131,7 +206,7 @@ def skaityk_teksta(kelias):
     try:
         return b.decode('utf-8-sig')
     except UnicodeDecodeError:
-        return b.decode('cp1257', errors='replace')
+        return b.decode(SENA_KODUOTE.get(kalba, 'cp1257'), errors='replace')
 
 
 # Eilutė iš trijų ar daugiau brūkšnių („---") dalija tekstą į atskirus mp3 — dėstytojui po failą
@@ -194,14 +269,67 @@ def _apsauga_ilgiems(p):
     return ''.join(out)
 
 
+class PiperSakiniais:
+    """Rusų, anglų, vokiečių balsai: Piper `espeak` kelias, bet su TOMIS PAČIOMIS pauzėmis kaip
+    lietuvių recepte (taškas 0,45 s ir t. t.). Pamatuota 10-29: Piper sakinius skaido pats, o tarp
+    jų palieka tik 0,15–0,35 s modelio tylos — paskaitai per tankiai, ir kiekvienam sakiniui vis
+    kitaip. Todėl tyla nukerpama tuo pačiu `nukirpk_tyla` ir dedama sava, vienoda.
+
+    Ilga pastraipa pirma pjaunama ties sakinio galu į ≤ RIBA simbolių gabalus — VITS dėmesio
+    atmintis auga kvadratiškai (SpeakDream `_dalyk`, kolonėlės 09-16 pamoka)."""
+    RIBA = 250
+    PAUZE = {'.': 0.45, '!': 0.45, '?': 0.45, '…': 0.45, ':': 0.20, ';': 0.20}
+
+    def __init__(self, voice, length_scale):
+        self.voice = voice
+        self.sr = voice.config.sample_rate
+        self.syn = SynthesisConfig(length_scale=length_scale, noise_scale=0.667,
+                                   noise_w_scale=0.8, normalize_audio=False)
+
+    def _tyla(self, s):
+        return np.zeros(int(self.sr * s), dtype=np.float32)
+
+    def _gabalai_tekstui(self, pastraipa):
+        dalys, dabar = [], ''
+        for s in [x for x in re.split(r'(?<=[.!?…;:])\s+', pastraipa.strip()) if x.strip()]:
+            if dabar and len(dabar) + 1 + len(s) > self.RIBA:
+                dalys.append(dabar)
+                dabar = s
+            else:
+                dabar = ('%s %s' % (dabar, s)).strip()
+        if dabar:
+            dalys.append(dabar)
+        return dalys
+
+    def gabalai(self, pastraipa):
+        for tekstas in self._gabalai_tekstui(pastraipa):
+            for c in self.voice.synthesize(tekstas, self.syn):
+                a = np.frombuffer(c.audio_int16_bytes, dtype='int16').astype(np.float32) / 32768.0
+                a = nukirpk_tyla(a, self.sr)
+                if not a.size:
+                    continue
+                yield a
+                # AudioChunk teksto neturi, bet jo fonemos baigiasi tuo pačiu skyrybos ženklu
+                # („prʲidɭʌʒˈɛnʲijɪ." — pamatuota 10-29).
+                galas = ''.join(c.phonemes or []).rstrip()[-1:]
+                yield self._tyla(self.PAUZE.get(galas, 0.25))
+        yield self._tyla(0.7)
+
+
 class Balsas:
     def __init__(self, raktas, greitis=1.0):
         """`greitis`: 1,0 — balso numatytasis tempas; mažiau — lėčiau, daugiau — greičiau
         (kaip SpeakDream slankiklis, 0,6–1,4)."""
-        self.vardas, bazinis, self.stiprinimas = BALSAI[raktas]
+        self.vardas, self.kalba, bazinis, self.stiprinimas = BALSAI[raktas]
         voice, fonemos = _ikrauk(raktas)
-        self.sinteze = ReginuteSynth(voice, fonemos, length_scale=bazinis / max(0.3, greitis),
-                                     expand_text=isplesk)
+        if self.kalba == 'lt':
+            self.sinteze = ReginuteSynth(voice, fonemos,
+                                         length_scale=bazinis / max(0.3, greitis),
+                                         expand_text=(
+                                             (lambda t: atskirk_vienodus_balsius(isplesk(t)))
+                                             if raktas in ATSKIRTI_VIENODUS_BALSIUS else isplesk))
+        else:
+            self.sinteze = PiperSakiniais(voice, bazinis / max(0.3, greitis))
         self.daznis = self.sinteze.sr
 
     def pastraipa(self, pastraipa):

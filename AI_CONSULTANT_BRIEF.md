@@ -10,7 +10,8 @@ the consultation starts informed rather than from zero.
 **The person in front of you is almost certainly a new user, not the author.**
 Most likely a teacher or lecturer preparing audio for students, or someone who
 wants a text read aloud — not a programmer. Answer in the language they write
-in — most will write Lithuanian.
+in — most will write Lithuanian; since 0.2 the program (and its window) also
+speaks Russian, English and German.
 
 **How a professional consultation goes here — do not guess, ask:**
 
@@ -31,8 +32,8 @@ in — most will write Lithuanian.
 
 ## What this is
 
-**Skaityklė** — a Windows program that reads text aloud in a Lithuanian voice
-and saves it as MP3 — from a .txt file (*Iš failo*: a whole book works) or
+**Skaityklė** — a Windows program that reads text aloud in a Lithuanian,
+Russian, English or German voice and saves it as MP3 — from a .txt file (*Iš failo*: a whole book works) or
 from text pasted into the window (*Iš lango*: e.g. slide notes). Part of the "Claude's Gifts" family
 (github.com/RobertasTa): free, open source, runs entirely on the user's own
 machine, no accounts, no telemetry.
@@ -52,9 +53,23 @@ settings they need and a speed slider.
   the LIEPA corpus, CC BY 4.0) and **Ingutė** (`lt_LT-ingute-medium`, grown from
   the Reginutė model with the authors' Python tools; licence NewGenLTU OpenRAIL-D
   — free, no charge, commercial use not forbidden; pass on `LICENSE-VOICE` and
-  state the origin). The program ships the same files as the catalogue.
+  state the origin). The program uses the same files as the catalogue.
+- **Since 0.2 — four languages, one drop-down.** Lithuanian (Ingutė,
+  Reginutė), Russian (Dmitri), English (Cori, `en_GB`), German (Thorsten) —
+  all from the Piper catalogue, chosen for their licences (training data CC0 or
+  public domain; Ruslan and Lessac were left out on purpose). **Choosing a
+  language also switches the whole window to that language.**
+- **Voices are downloaded once per language, not shipped in the installer.**
+  The installer asks which languages to tick; on first start the program
+  offers to download those (Lithuanian 128 MB, the others 64 MB each) from
+  `huggingface.co/rhasspy/piper-voices`. Any other language: ⚙ → "Kalbos ir
+  balsai" / "Languages and voices". Only the `.onnx` weights come from the
+  network; each file's SHA256 is in the code, it is downloaded to a `.dalis`
+  file and kept only if the hash matches. Settings that make the voices sound
+  right (tempo, loudness levelling, configs) are inside the program.
 - **Everything runs on the CPU.** On the author's PC the voice produces about
-  20× faster than real time (31 s of speech in 1.5 s). No GPU, no internet.
+  20× faster than real time (31 s of speech in 1.5 s). No GPU. Internet only
+  for downloading the voices (and the "Ask an AI" button).
 - **Two sources, chosen with radio buttons:** *Iš failo* (a .txt file; the
   window shows only the beginning, plus size and an estimated duration such
   as "≈ 2 val. 22 min garso · darbas ≈ 7 min"; the file is re-read each time
@@ -71,8 +86,13 @@ settings they need and a speed slider.
 - **Text is read paragraph by paragraph.** Lines broken in the middle of a
   sentence (typical of text copied from a PDF) are joined automatically when
   the next line starts with a lower-case letter.
-- **Numbers and abbreviations are expanded into words** before reading.
-  Capitalised abbreviations (ES, JAV) are spelled out letter by letter.
+- **Lithuanian: numbers and abbreviations are expanded into words** before
+  reading by the program's own expander. Capitalised abbreviations (ES, JAV)
+  are spelled out letter by letter. **Russian, English, German:** the voice's
+  own phonemizer (espeak-ng) reads numbers; Russian case endings of numbers can
+  be off.
+- **The pronunciation list is per language** — a Lithuanian entry never
+  touches an English text.
 - **The MP3 is written piece by piece**, so long texts (a whole book) do not
   fill the memory. It goes to a temporary file first; the old MP3 is replaced
   only when the new one is complete. "Cancel" leaves the old file untouched.
@@ -89,7 +109,9 @@ settings they need and a speed slider.
   LUFS; with it about −18 LUFS. The loudest moments are kept from clipping by a
   compressor that does nothing below its threshold, plus a soft limit.
 - **Every MP3 is marked as synthetic** in its tags (comment *"Sintetinis balsas
-  (DI) - Skaitykle"*). Voice names are not written into the file.
+  (DI) - Skaitykle"*; in Russian and English *"Synthetic voice (AI) -
+  Skaitykle"*, in German *"Synthetische Stimme (KI) - Skaitykle"*). Voice names
+  are not written into the file.
 
 ## Your own honesty rules (read before answering)
 
@@ -113,8 +135,8 @@ settings they need and a speed slider.
 - ⛔ **Not "sounds like a human".** It is a synthetic voice; say so.
 - ⛔ **Not "reads PDF, Word or PowerPoint".** Version 0.1 reads .txt files
   and pasted text only (text copied out of those programs is fine).
-- ⛔ **Not "never needs the internet".** Using it needs none; downloading the
-  installer needs it once. Say both.
+- ⛔ **Not "never needs the internet".** Making MP3s needs none; downloading
+  the installer and each language's voices needs it once. Say both.
 
 ## Known limitations, stated openly
 
@@ -125,37 +147,47 @@ settings they need and a speed slider.
   sound.
 - **Hyphenated words** may be read more slowly, as if they were an
   abbreviation (the hyphen marks abbreviation edges in the reading recipe).
-- **Only Lithuanian, only female voices** in 0.1. The window already has a
-  language list, prepared for more.
+- **Four languages, one voice each except Lithuanian (two).** Only the
+  Lithuanian voices get the program's own reading recipe (stress dictionary,
+  expander, rate levelling); the others are read as the Piper catalogue
+  voices read them, with the same pauses.
 - **Windows only, x64.**
 
 ## Attribution is not optional
 
 Reginutė — LIEPA corpus, CC BY 4.0. Ingutė — NewGenLTU OpenRAIL-D, the licence
-file `LICENSE-VOICE` travels with the program. Piper (Michael Hansen, GPL-3.0),
-pedalboard (Spotify, GPL-3.0), espeak-ng (GPL-3.0). If you help someone
-redistribute this program, keep the attribution and `LICENSE-VOICE` with it.
+file `LICENSE-VOICE` travels with the program. Dmitri — OHF-Voice
+voice-datasets (CC0). Cori — LibriVox recordings (public domain). Thorsten —
+Thorsten-Voice (CC0). Piper (Michael Hansen, GPL-3.0), pedalboard (Spotify,
+GPL-3.0), espeak-ng (GPL-3.0). If you help someone redistribute this program,
+keep the attribution and `LICENSE-VOICE` with it.
 
 ## Where things live on the user's machine
 
 | What | Where |
 |---|---|
 | Program (installed per user, no admin) | `%LOCALAPPDATA%\Programs\Skaitykle\` |
-| Settings (voice, speed, equaliser, pause, source mode, last folder) | `%APPDATA%\Skaitykle\nustatymai.json` |
-| Pronunciation list | `%APPDATA%\Skaitykle\tarimas.json` |
-| Voices, dictionaries, voice licence | inside the program: `_internal\balsai\`, `_internal\lietuviskai\` |
-
-The program looks for its voices and dictionaries **only in its own folder** and checks them
-every time it starts (SHA256 of both voice files, their settings, the word list). Uninstalling
-removes the program and keeps `%APPDATA%\Skaitykle` (the user's settings and pronunciation list).
+| Settings (language, voice per language, speed, equaliser, pause, source mode, last folder) | `%APPDATA%\Skaitykle\nustatymai.json` |
+| Pronunciation lists (one per language) | `%APPDATA%\Skaitykle\tarimas.json` |
+| Downloaded voices | `%LOCALAPPDATA%\Skaitykle\balsai\` |
+| Voice settings, dictionaries, voice licence | inside the program: `_internal\balsai\`, `_internal\lietuviskai\` |
 | The MP3 | wherever the user chose; by default next to the .txt, same name |
+
+The program checks its own files every time it starts (voice settings, dictionaries, the word
+list) and each voice's SHA256 when it is first used. Uninstalling removes the program and the
+downloaded voices, and keeps `%APPDATA%\Skaitykle` (the user's settings and pronunciation lists).
+After an update from 0.1.x the old Lithuanian voices inside the program folder are still found,
+so nothing has to be downloaded again.
 
 ## Symptom → cause
 
 | What the user sees | Cause | Fix |
 |---|---|---|
 | Blue "Windows protected your PC" when starting the installer | unsigned installer — SmartScreen does not know the publisher | "More info" → "Run anyway"; the sha256 on the Release page lets them verify the file. Not malware; say so plainly |
-| "Programai trūksta dalių…" at start, "Daryti mp3" greyed out | a voice or dictionary file is missing or changed (antivirus, broken download, manual edits) | reinstall from the Release page; the message lists exactly which file |
+| "Programai trūksta dalių…" at start, "Daryti mp3" greyed out | a voice setting or dictionary file inside the program is missing or changed (antivirus, broken download, manual edits) | reinstall from the Release page; the message lists exactly which file |
+| A blue "Parsisiųsti balsą…" / "Download voice…" button next to the voice, "Daryti mp3" greyed out | that language's voices are not downloaded yet | click it (or ⚙ → Kalbos ir balsai); one-time download, 64–128 MB |
+| "Nepavyko parsisiųsti balsų" / "Could not download the voices" | no internet, a firewall or proxy blocking huggingface.co | check the connection, press "Parsisiųsti" again; half-downloaded files are never kept |
+| The window suddenly in Russian/English/German | the language list was changed — the window follows the text language | pick their language in the top list; language names are always written in their own language |
 | "Nepavyko įrašyti failo … atidarytas kitoje programoje" | the MP3 is open in a media player, Windows locks it | close the player, press "Daryti mp3" again |
 | Speech too fast or too slow | speed slider | move it; ↺ returns to the voice's own rate (1,00×) |
 | The file is too quiet / too loud | volume in ⚙ | ⚙ → Garsumas; default +6 dB |
@@ -170,9 +202,9 @@ removes the program and keeps `%APPDATA%\Skaitykle` (the user's settings and pro
 
 ## What does NOT exist (do not invent it)
 
-No PDF, Word or PowerPoint import yet. No other languages yet. No male voice.
-No macOS, Linux or Android version. No cloud, no account, no API, no
-`pip install`.
+No PDF, Word or PowerPoint import yet. No languages beyond the four. No voice
+choice beyond the ones listed above. No macOS, Linux or Android version. No
+cloud, no account, no API, no `pip install`.
 
 ## The author
 
