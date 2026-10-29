@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="ngCuEME8a9C8od6O7mw1EHMId6BzZqJE9-xi-NIyy-Y" />
+<title>Skaityklė — текст в MP3 для Windows без интернета: русский, литовский, английский, немецкий</title>
+<meta name="description" content="Бесплатная программа с открытым кодом для Windows: вставьте текст или откройте файл .txt и получите MP3, прочитанный естественным голосом — по-русски, по-литовски, по-английски или по-немецки. Скорость, эквалайзер, словарик произношения. Всё работает на вашем компьютере.">
+<meta property="og:title" content="Skaityklė — текст в MP3 голосом">
+<meta property="og:description" content="Вставьте текст или откройте .txt и получите MP3. Русский, литовский, английский, немецкий; на вашем компьютере, бесплатно.">
+<meta property="og:image" content="https://robertasta.github.io/skaitykle/banner.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<link rel="canonical" href="https://robertasta.github.io/skaitykle/ru/">
+<link rel="alternate" hreflang="lt" href="https://robertasta.github.io/skaitykle/">
+<link rel="alternate" hreflang="en" href="https://robertasta.github.io/skaitykle/en/">
+<link rel="alternate" hreflang="ru" href="https://robertasta.github.io/skaitykle/ru/">
+<link rel="alternate" hreflang="de" href="https://robertasta.github.io/skaitykle/de/">
+<link rel="alternate" hreflang="x-default" href="https://robertasta.github.io/skaitykle/en/">
+<style>
+  :root{
+    --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
+    --text:#f5f7fc; --muted:#bcc4d6; --amber:#e8b84b; --line:#1d3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--amber)}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  .kalba{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;font-size:.92rem;color:var(--muted)}
+  .kalba b{color:var(--amber)}
+  header{padding:32px 0 36px;text-align:center}
+  header img.hero{width:100%;max-width:820px;border-radius:10px;border:1px solid var(--line);margin-bottom:26px}
+  h1{font-size:2.4rem;font-weight:700;letter-spacing:.5px}
+  .tagline{font-size:1.25rem;color:var(--muted);margin-top:10px}
+  .amber{color:var(--amber);font-style:italic;margin-top:8px}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 8px}
+  .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-amber{background:var(--amber);color:#1a1200}
+  .btn-ghost{border:1px solid var(--line);color:var(--text)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{font-size:1.02rem;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:.95rem}
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}
+  .shots img{width:100%;border-radius:8px;border:1px solid var(--line)}
+  .ask{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px}
+  .ask p{color:var(--muted)}
+  .ask p+p{margin-top:12px}
+  code{overflow-wrap:anywhere;font-family:Consolas,"Courier New",monospace;background:#00081a;padding:2px 6px;border-radius:4px}
+  .zyma{color:var(--muted);font-size:.95rem;border-left:3px solid var(--amber);padding-left:14px;margin-top:18px}
+  ol,ul{padding-left:22px;color:var(--muted)}
+  li+li{margin-top:6px}
+  .padekos p{color:var(--muted);font-size:.95rem}
+  .padekos p+p{margin-top:12px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+  footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+  .kita{display:flex;gap:20px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .kita img{width:80px;height:80px;flex:none;display:block}
+  .kita h3{font-size:1.15rem;margin-bottom:6px}
+  .kita p{color:var(--muted);font-size:.95rem}
+  .kita .actions{justify-content:flex-start;margin:16px 0 0}
+  @media (max-width:520px){.kita{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav class="kalba wrap" aria-label="Язык / Kalba"><a href="../index.html" hreflang="lt" lang="lt">LT</a> · <a href="../en/index.html" hreflang="en" lang="en">EN</a> · <b>RU</b> · <a href="../de/index.html" hreflang="de" lang="de">DE</a></nav>
+
+<header class="wrap">
+  <img class="hero" src="../banner.png" alt="Рука робота держит подарочную коробку со значком документа и звуковых волн; рядом надпись «Skaityklė — Text to MP3, read aloud. Synthetic voices, fully offline.» (иллюстрация создана с помощью ИИ)">
+  <h1>Skaityklė</h1>
+  <p class="tagline">Текст в MP3 голосом — по-русски, по-литовски, по-английски или по-немецки.</p>
+  <p class="amber">Вставьте текст или откройте файл .txt и получите MP3. На вашем компьютере, бесплатно; интернет нужен один раз, чтобы скачать голоса.</p>
+  <div class="actions">
+    <a class="btn btn-amber" href="https://github.com/RobertasTa/skaitykle/releases/latest">Скачать для Windows</a>
+    <a class="btn btn-ghost" href="https://github.com/RobertasTa/skaitykle">Код на GitHub</a>
+  </div>
+  <p class="zyma" style="text-align:left">Сделано с помощью ИИ: код программы писал Claude (Anthropic) вместе с Робертасом, иконка создана ИИ. Записи <b>синтетические</b> — в каждом MP3 это отмечено меткой.</p>
+</header>
+
+<section class="wrap">
+  <h2>Для чего</h2>
+  <div class="grid">
+    <div class="card"><h3>Преподавателям и учителям</h3><p>Озвучить комментарии к слайдам. Строка <code>---</code> в тексте делит запись на несколько MP3: по файлу на каждый слайд.</p></div>
+    <div class="card"><h3>Целая книга</h3><p>Откройте файл .txt: программа покажет, сколько примерно будет длиться запись и работа, и озвучит его целиком. 100 страниц обычно занимают несколько минут.</p></div>
+    <div class="card"><h3>Тем, кому удобнее слушать</h3><p>Статья, письмо, заметки — в MP3 и в наушники: в дороге, на кухне, на прогулке.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Что умеет</h2>
+  <div class="grid">
+    <div class="card"><h3>Четыре языка</h3><p>Русский (<b>Dmitri</b>), литовский (<b>Ingutė</b> и <b>Reginutė</b>), английский (<b>Cori</b>), немецкий (<b>Thorsten</b>) — все из официального каталога голосов <a href="https://github.com/OHF-Voice/piper1-gpl">Piper</a>. Выбираете язык, и на него переключается всё окно. Кнопка ▸ даёт послушать заранее.</p></div>
+    <div class="card"><h3>Голоса только нужных языков</h3><p>При установке отметьте языки галочками; их голоса скачиваются один раз (литовский 128 МБ, остальные по 64 МБ). Другие языки можно добавить когда угодно через ⚙ → «Языки и голоса».</p></div>
+    <div class="card"><h3>Ползунок скорости</h3><p>Медленнее или быстрее — как вам удобно. ↺ возвращает собственный темп голоса.</p></div>
+    <div class="card"><h3>Из файла или в окне</h3><p>Файл .txt (подходят и старые кодировки Windows) или вставленный либо набранный текст.</p></div>
+    <div class="card"><h3>Словарик произношения</h3><p>«Как написано → как должно звучать» для терминов и фамилий, с прослушиванием. У каждого языка свой словарик.</p></div>
+    <div class="card"><h3>Эквалайзер ⚙</h3><p>Семь полос от низких до высоких, громкость и пауза между абзацами в секундах. Двигаете ползунки во время прослушивания — звук меняется сразу. Там же и скорость.</p></div>
+    <div class="card"><h3>Выделите и ▸</h3><p>Выделите кусок текста и нажмите ▸ — прозвучит только он.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Как выглядит</h2>
+  <div class="shots">
+    <img src="../langas_ru.png" alt="Skaityklė по-русски: язык русский, голос Dmitri, ползунок скорости, текст в окне со строкой ---, из которого получатся два MP3">
+    <img src="../nustatymai_ru.png" alt="Настройки (⚙): семиполосный эквалайзер от 125 Гц до 8 кГц, скорость, громкость, пауза между абзацами и раздел «Языки и голоса»: русский скачан, у литовского, английского и немецкого кнопки «Загрузить»">
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Как пользоваться</h2>
+  <ol>
+    <li>Выберите <b>язык</b>, <b>голос</b> и, если нужно, <b>скорость</b>.</li>
+    <li><b>Из файла</b> — «Выбрать…» и файл .txt; <b>В окне</b> — вставьте текст.</li>
+    <li><b>«Сделать mp3»</b> — файл появится рядом с текстовым файлом (или там, где укажете).</li>
+    <li><b>«Прослушать файл»</b> — не понравилось? Измените скорость, голос или звук и сделайте заново.</li>
+  </ol>
+  <p class="zyma"><b>Скачать:</b> <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Skaitykle-0.2.0-setup.exe</a> — около 80 МБ, Windows 10/11 (64 бит). Устанавливается в ваш профиль, права администратора не нужны. При первом запуске программа предложит скачать голоса отмеченных языков и проверит каждый файл по контрольной сумме; дальше работает без интернета.</p>
+  <p class="zyma"><b>Windows покажет синее окно «Система Windows защитила ваш компьютер».</b> Это не вирус: у установщика нет платной цифровой подписи, поэтому SmartScreen не знает издателя. Нажмите «Подробнее» → «Выполнить в любом случае». Сумма SHA256 файла указана на странице Release рядом с ним.</p>
+</section>
+
+<section class="wrap">
+  <h2>Приватность, честно</h2>
+  <p>Текст и звук <b>не покидают компьютер</b>: голоса работают на вашей машине. В интернет программа выходит только в двух случаях. Первый — скачать голоса выбранных языков из каталога голосов Piper (huggingface.co): только когда вы нажмёте «Загрузить», и скачивается только файл голоса. Второй — «Спросите ИИ»: программа переспросит, уверены ли вы, и только тогда откроет в браузере claude.ai с описанием программы. Вашего текста нет ни там, ни там.</p>
+</section>
+
+<section class="wrap">
+  <h2>Голоса</h2>
+  <ul>
+    <li><b>Dmitri</b> (русский) — записи из OHF-Voice voice-datasets, <b>CC0</b>.</li>
+    <li><b>Reginutė</b> (литовский) — обучена на корпусе LIEPA, лицензия <b>CC BY 4.0</b>.</li>
+    <li><b>Ingutė</b> (литовский) — выросла из модели Reginutė с помощью Python-инструментов авторов. Лицензия <b>NewGenLTU OpenRAIL-D</b>: пользоваться можно свободно и бесплатно, коммерческое использование не запрещено; передавая дальше, приложите <a href="https://github.com/RobertasTa/skaitykle/blob/main/skaitykle/balsai/LICENSE-VOICE-ingute">LICENSE-VOICE</a> и укажите происхождение.</li>
+    <li><b>Cori</b> (английский) — записи LibriVox, <b>общественное достояние</b>.</li>
+    <li><b>Thorsten</b> (немецкий) — Thorsten-Voice, <b>CC0</b>.</li>
+  </ul>
+  <p class="zyma">Все голоса опубликованы в официальном каталоге голосов Piper; скачанный файл программа проверяет по контрольной сумме (SHA256). Русский, английский и немецкий голоса мы выбирали по лицензии записей: только CC0 или общественное достояние.</p>
+</section>
+
+<section class="wrap">
+  <h2>Ограничения</h2>
+  <ul>
+    <li>Собственный рецепт чтения программы (словарь ударений, числа словами) — <b>только для литовского</b>. Русский, английский и немецкий голоса читают так, как их научил Piper: числа произносят сами, и падежи числительных в русском не всегда правильные.</li>
+    <li>Пока читает <b>только .txt</b> и вставленный текст (из Word, PDF или PowerPoint текст можно скопировать в окно).</li>
+    <li>Только Windows.</li>
+    <li>Это <b>синтетический голос</b> — естественный, но не человек.</li>
+  </ul>
+</section>
+
+<section class="wrap">
+  <h2>Не получается? Спросите ИИ</h2>
+  <div class="ask">
+    <p><b>Не программист?</b> В программе нажмите <b>«?» → «Не нашли ответа? Спросите ИИ»</b> — откроется чат с ассистентом, который уже получил от автора описание этой программы. Спрашивайте своими словами, по-русски.</p>
+    <p>Или вставьте в любой чат с ИИ: <code>Прочитай https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONSULTANT_BRIEF.md и помоги мне со Skaityklė.</code></p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Наш другой подарок — Diktuoklė</h2>
+  <div class="kita">
+    <a href="https://robertasta.github.io/diktuokle/ru/index.html"><img src="../diktuokle_ikona.png" alt="Иконка Diktuoklė — микрофон и документ"></a>
+    <div>
+      <h3>Diktuoklė — диктовка голосом без интернета</h3>
+      <p>Skaityklė превращает текст в голос, Diktuoklė — наоборот: держите Ctrl, говорите по-русски, по-литовски или по-английски, и текст появляется в любой программе — Word, браузере, письме. Тоже без интернета и бесплатно.</p>
+      <div class="actions">
+        <a class="btn btn-amber" href="https://robertasta.github.io/diktuokle/ru/index.html">О Diktuoklė</a>
+        <a class="btn btn-ghost" href="https://github.com/RobertasTa/diktuokle/releases/latest">Скачать</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap padekos">
+  <h2>Спасибо</h2>
+  <p><a href="https://github.com/OHF-Voice/piper1-gpl"><b>Piper</b></a> и <b>Майклу Хансену</b> — за движок и каталог голосов; создателям корпуса <b>LIEPA</b>; <b>Nabu Casa</b> — за записи Dmitri, <b>Торстену Мюллеру</b> — за Thorsten-Voice, <b>Брайсу Битти</b> и чтецам LibriVox — за Cori; <b>Spotify</b> — за <a href="https://github.com/spotify/pedalboard">pedalboard</a> (эквалайзер и чтение MP3); проектам <b>espeak-ng</b>, <b>Qt / PyQt6</b>, <b>ONNX Runtime</b>, <b>libsndfile</b> и <b>LAME</b>.</p>
+  <p>Skaityklė — это рот, <a href="https://robertasta.github.io/diktuokle/ru/index.html">Diktuoklė</a> — уши. Вопросы и замечания — в <a href="https://github.com/RobertasTa/skaitykle/issues">Issues</a>.</p>
+</section>
+
+<footer class="wrap">
+  <p><a href="https://github.com/RobertasTa/skaitykle">GitHub</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Скачать</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/blob/main/LICENSE">GPL v3</a> ·
+     <a href="https://github.com/RobertasTa">Другие подарки</a></p>
+  <p class="sig">Подарок от Claude и Робертаса</p>
+</footer>
+
+</body>
+</html>

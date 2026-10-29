@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="ngCuEME8a9C8od6O7mw1EHMId6BzZqJE9-xi-NIyy-Y" />
+<title>Skaityklė — Text zu MP3 für Windows, offline: Deutsch, Litauisch, Russisch, Englisch</title>
+<meta name="description" content="Kostenloses Open-Source-Programm für Windows: Text einfügen oder eine .txt-Datei öffnen und eine MP3 bekommen, vorgelesen mit natürlicher Stimme — auf Deutsch, Litauisch, Russisch oder Englisch. Tempo, Equalizer, Aussprache-Liste. Alles läuft auf Ihrem eigenen Computer.">
+<meta property="og:title" content="Skaityklė — Text zu MP3, vorgelesen">
+<meta property="og:description" content="Text einfügen oder .txt öffnen und eine MP3 bekommen. Deutsch, Litauisch, Russisch, Englisch; auf Ihrem Computer, kostenlos.">
+<meta property="og:image" content="https://robertasta.github.io/skaitykle/banner.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<link rel="canonical" href="https://robertasta.github.io/skaitykle/de/">
+<link rel="alternate" hreflang="lt" href="https://robertasta.github.io/skaitykle/">
+<link rel="alternate" hreflang="en" href="https://robertasta.github.io/skaitykle/en/">
+<link rel="alternate" hreflang="ru" href="https://robertasta.github.io/skaitykle/ru/">
+<link rel="alternate" hreflang="de" href="https://robertasta.github.io/skaitykle/de/">
+<link rel="alternate" hreflang="x-default" href="https://robertasta.github.io/skaitykle/en/">
+<style>
+  :root{
+    --bg:#010d24; --bg2:#06173a; --card:#0b1f47;
+    --text:#f5f7fc; --muted:#bcc4d6; --amber:#e8b84b; --line:#1d3560;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;line-height:1.6}
+  a{color:var(--amber)}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px}
+  .kalba{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;font-size:.92rem;color:var(--muted)}
+  .kalba b{color:var(--amber)}
+  header{padding:32px 0 36px;text-align:center}
+  header img.hero{width:100%;max-width:820px;border-radius:10px;border:1px solid var(--line);margin-bottom:26px}
+  h1{font-size:2.4rem;font-weight:700;letter-spacing:.5px}
+  .tagline{font-size:1.25rem;color:var(--muted);margin-top:10px}
+  .amber{color:var(--amber);font-style:italic;margin-top:8px}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 8px}
+  .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;text-decoration:none}
+  .btn-amber{background:var(--amber);color:#1a1200}
+  .btn-ghost{border:1px solid var(--line);color:var(--text)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{font-size:1.4rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{font-size:1.02rem;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:.95rem}
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:14px}
+  .shots img{width:100%;border-radius:8px;border:1px solid var(--line)}
+  .ask{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:24px}
+  .ask p{color:var(--muted)}
+  .ask p+p{margin-top:12px}
+  code{overflow-wrap:anywhere;font-family:Consolas,"Courier New",monospace;background:#00081a;padding:2px 6px;border-radius:4px}
+  .zyma{color:var(--muted);font-size:.95rem;border-left:3px solid var(--amber);padding-left:14px;margin-top:18px}
+  ol,ul{padding-left:22px;color:var(--muted)}
+  li+li{margin-top:6px}
+  .padekos p{color:var(--muted);font-size:.95rem}
+  .padekos p+p{margin-top:12px}
+  footer{padding:36px 0 48px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+  footer .sig{color:var(--amber);font-style:italic;margin-top:6px}
+  .kita{display:flex;gap:20px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .kita img{width:80px;height:80px;flex:none;display:block}
+  .kita h3{font-size:1.15rem;margin-bottom:6px}
+  .kita p{color:var(--muted);font-size:.95rem}
+  .kita .actions{justify-content:flex-start;margin:16px 0 0}
+  @media (max-width:520px){.kita{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav class="kalba wrap" aria-label="Sprache / Kalba"><a href="../index.html" hreflang="lt" lang="lt">LT</a> · <a href="../en/index.html" hreflang="en" lang="en">EN</a> · <a href="../ru/index.html" hreflang="ru" lang="ru">RU</a> · <b>DE</b></nav>
+
+<header class="wrap">
+  <img class="hero" src="../banner.png" alt="Eine Roboterhand hält eine Geschenkbox mit Dokument- und Schallwellen-Symbol; daneben der Schriftzug „Skaityklė — Text to MP3, read aloud. Synthetic voices, fully offline.“ (Illustration mit KI erstellt)">
+  <h1>Skaityklė</h1>
+  <p class="tagline">Text zu MP3, vorgelesen — auf Deutsch, Litauisch, Russisch oder Englisch.</p>
+  <p class="amber">Text einfügen oder eine .txt-Datei öffnen, MP3 bekommen. Auf Ihrem eigenen Computer, kostenlos; Internet braucht es nur einmal, um die Stimmen herunterzuladen.</p>
+  <div class="actions">
+    <a class="btn btn-amber" href="https://github.com/RobertasTa/skaitykle/releases/latest">Für Windows herunterladen</a>
+    <a class="btn btn-ghost" href="https://github.com/RobertasTa/skaitykle">Code auf GitHub</a>
+  </div>
+  <p class="zyma" style="text-align:left">Mit KI erstellt: Den Code hat Claude (Anthropic) zusammen mit Robertas geschrieben, das Symbol ist mit KI entstanden. Die Aufnahmen sind <b>synthetisch</b> — jede MP3 trägt einen entsprechenden Vermerk.</p>
+</header>
+
+<section class="wrap">
+  <h2>Wofür</h2>
+  <div class="grid">
+    <div class="card"><h3>Für Lehrende</h3><p>Die Notizen zu Folien vertonen. Eine Zeile <code>---</code> im Text teilt die Aufnahme in mehrere MP3-Dateien: eine pro Folie.</p></div>
+    <div class="card"><h3>Ein ganzes Buch</h3><p>Öffnen Sie eine .txt-Datei: Das Programm zeigt, wie lang die Aufnahme und die Arbeit ungefähr dauern, und liest dann alles vor. 100 Seiten dauern meist ein paar Minuten.</p></div>
+    <div class="card"><h3>Für alle, die lieber zuhören</h3><p>Ein Artikel, ein Brief, Notizen — als MP3 in die Kopfhörer: unterwegs, in der Küche, beim Spaziergang.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Was es kann</h2>
+  <div class="grid">
+    <div class="card"><h3>Vier Sprachen</h3><p>Deutsch (<b>Thorsten</b>), Litauisch (<b>Ingutė</b> und <b>Reginutė</b>), Russisch (<b>Dmitri</b>), Englisch (<b>Cori</b>) — alle aus dem offiziellen <a href="https://github.com/OHF-Voice/piper1-gpl">Piper</a>-Stimmenkatalog. Wählen Sie eine Sprache, und das ganze Fenster wechselt mit. Mit ▸ hören Sie vorher eine Probe.</p></div>
+    <div class="card"><h3>Nur die Stimmen, die Sie brauchen</h3><p>Bei der Installation die Sprachen ankreuzen; ihre Stimmen werden einmal heruntergeladen (Litauisch 128 MB, die anderen je 64 MB). Weitere Sprachen jederzeit über ⚙ → „Sprachen und Stimmen“.</p></div>
+    <div class="card"><h3>Tempo-Regler</h3><p>Langsamer oder schneller, wie es Ihnen passt. ↺ stellt das eigene Tempo der Stimme wieder her.</p></div>
+    <div class="card"><h3>Aus Datei oder im Fenster</h3><p>Eine .txt-Datei (auch alte Windows-Kodierungen) oder eingefügter bzw. getippter Text.</p></div>
+    <div class="card"><h3>Aussprache-Liste</h3><p>„Wie geschrieben → wie es klingen soll“ für Fachbegriffe und Namen, mit Hörprobe. Jede Sprache hat ihre eigene Liste.</p></div>
+    <div class="card"><h3>Equalizer ⚙</h3><p>Sieben Bänder von tief bis hoch, Lautstärke und die Pause zwischen Absätzen in Sekunden. Regler beim Zuhören bewegen — der Klang ändert sich sofort. Das Tempo ist auch dort.</p></div>
+    <div class="card"><h3>Markieren und ▸</h3><p>Ein Stück Text markieren und ▸ drücken — Sie hören nur diesen Teil.</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>So sieht es aus</h2>
+  <div class="shots">
+    <img src="../langas_de.png" alt="Skaityklė auf Deutsch: Sprache Deutsch, Stimme Thorsten, Tempo-Regler, Text im Fenster mit einer Zeile ---, aus dem zwei MP3-Dateien werden">
+    <img src="../nustatymai_de.png" alt="Einstellungen (⚙): Equalizer mit sieben Bändern von 125 Hz bis 8 kHz, Tempo, Lautstärke, Pause zwischen Absätzen und „Sprachen und Stimmen“: Deutsch heruntergeladen, bei Litauisch, Russisch und Englisch die Schaltfläche „Herunterladen“">
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>So geht’s</h2>
+  <ol>
+    <li><b>Sprache</b>, <b>Stimme</b> und bei Bedarf <b>Tempo</b> wählen.</li>
+    <li><b>Aus Datei</b> — „Auswählen…“ und eine .txt-Datei; <b>Im Fenster</b> — Text einfügen.</li>
+    <li><b>„MP3 erstellen“</b> — die Datei erscheint neben der Textdatei (oder wo Sie möchten).</li>
+    <li><b>„Abspielen“</b> — nicht zufrieden? Tempo, Stimme oder Klang ändern und neu erstellen.</li>
+  </ol>
+  <p class="zyma"><b>Download:</b> <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Skaitykle-0.2.0-setup.exe</a> — etwa 80 MB, Windows 10/11 (64 Bit). Installiert sich in Ihr Benutzerprofil, ohne Administratorrechte. Beim ersten Start bietet das Programm an, die Stimmen der angekreuzten Sprachen herunterzuladen, und prüft jede Datei anhand ihrer Prüfsumme; danach läuft es offline.</p>
+  <p class="zyma"><b>Windows zeigt ein blaues Fenster „Der Computer wurde durch Windows geschützt“.</b> Das ist keine Schadsoftware: Der Installer hat kein kostenpflichtiges Code-Signing-Zertifikat, deshalb kennt SmartScreen den Herausgeber nicht. Klicken Sie auf „Weitere Informationen“ → „Trotzdem ausführen“. Die SHA256-Summe der Datei steht auf der Release-Seite daneben.</p>
+</section>
+
+<section class="wrap">
+  <h2>Datenschutz, offen gesagt</h2>
+  <p>Ihr Text und der Ton <b>verlassen den Computer nicht</b>: Die Stimmen laufen auf Ihrem Rechner. Ins Internet geht das Programm nur in zwei Fällen. Erstens, um die Stimmen der gewählten Sprachen aus dem Piper-Stimmenkatalog (huggingface.co) zu laden: nur wenn Sie auf „Herunterladen“ klicken, und geladen wird nur die Stimmdatei. Zweitens „KI fragen“: Es fragt nach, ob Sie sicher sind, und öffnet erst dann claude.ai im Browser mit einer Beschreibung des Programms. Ihr Text ist an keiner der beiden Stellen dabei.</p>
+</section>
+
+<section class="wrap">
+  <h2>Stimmen</h2>
+  <ul>
+    <li><b>Thorsten</b> (Deutsch) — Thorsten-Voice, <b>CC0</b>.</li>
+    <li><b>Reginutė</b> (Litauisch) — trainiert mit dem LIEPA-Korpus, Lizenz <b>CC BY 4.0</b>.</li>
+    <li><b>Ingutė</b> (Litauisch) — aus dem Reginutė-Modell mit den Python-Werkzeugen der Autoren entstanden. Lizenz <b>NewGenLTU OpenRAIL-D</b>: frei und kostenlos nutzbar, kommerzielle Nutzung nicht verboten; bei der Weitergabe <a href="https://github.com/RobertasTa/skaitykle/blob/main/skaitykle/balsai/LICENSE-VOICE-ingute">LICENSE-VOICE</a> beilegen und die Herkunft nennen.</li>
+    <li><b>Dmitri</b> (Russisch) — Aufnahmen aus OHF-Voice voice-datasets, <b>CC0</b>.</li>
+    <li><b>Cori</b> (Englisch) — LibriVox-Aufnahmen, <b>gemeinfrei</b>.</li>
+  </ul>
+  <p class="zyma">Alle Stimmen sind im offiziellen Piper-Stimmenkatalog veröffentlicht; jede heruntergeladene Datei prüft das Programm anhand ihrer SHA256-Summe. Die deutsche, russische und englische Stimme haben wir nach der Lizenz der Aufnahmen gewählt: nur CC0 oder gemeinfrei.</p>
+</section>
+
+<section class="wrap">
+  <h2>Grenzen</h2>
+  <ul>
+    <li>Das eigene Leserezept des Programms (Betonungswörterbuch, Zahlen in Worten) gilt <b>nur für Litauisch</b>. Die deutsche, russische und englische Stimme lesen so, wie Piper sie trainiert hat: Zahlen sprechen sie selbst aus, und im Russischen stimmen die Fälle von Zahlwörtern nicht immer.</li>
+    <li>Liest vorerst <b>nur .txt</b> und eingefügten Text (Text aus Word, PDF oder PowerPoint kann man ins Fenster kopieren).</li>
+    <li>Nur Windows.</li>
+    <li>Es ist eine <b>synthetische Stimme</b> — natürlich, aber kein Mensch.</li>
+  </ul>
+</section>
+
+<section class="wrap">
+  <h2>Hängen geblieben? Fragen Sie eine KI</h2>
+  <div class="ask">
+    <p><b>Kein Programmierer?</b> Im Programm auf <b>„?“ → „Keine Antwort gefunden? KI fragen“</b> klicken — es öffnet sich ein Chat mit einem Assistenten, der die Einführung des Autors zu diesem Programm schon bekommen hat. Fragen Sie in Ihren eigenen Worten, auf Deutsch.</p>
+    <p>Oder in einen beliebigen KI-Chat einfügen: <code>Lies https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONSULTANT_BRIEF.md und hilf mir mit Skaityklė.</code></p>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>Unser anderes Geschenk — Diktuoklė</h2>
+  <div class="kita">
+    <a href="https://robertasta.github.io/diktuokle/de/index.html"><img src="../diktuokle_ikona.png" alt="Diktuoklė-Symbol — ein Mikrofon und ein Dokument"></a>
+    <div>
+      <h3>Diktuoklė — Diktieren ohne Internet</h3>
+      <p>Skaityklė macht aus Text eine Stimme, Diktuoklė umgekehrt: Strg halten, Litauisch, Russisch oder Englisch sprechen, und der Text erscheint in jedem Programm — Word, Browser, E-Mail. Ebenfalls offline und kostenlos.</p>
+      <div class="actions">
+        <a class="btn btn-amber" href="https://robertasta.github.io/diktuokle/de/index.html">Über Diktuoklė</a>
+        <a class="btn btn-ghost" href="https://github.com/RobertasTa/diktuokle/releases/latest">Herunterladen</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap padekos">
+  <h2>Danke</h2>
+  <p><a href="https://github.com/OHF-Voice/piper1-gpl"><b>Piper</b></a> und <b>Michael Hansen</b> für die Engine und den Stimmenkatalog; den Machern des <b>LIEPA</b>-Korpus; <b>Nabu Casa</b> für die Dmitri-Aufnahmen, <b>Thorsten Müller</b> für Thorsten-Voice, <b>Bryce Beattie</b> und den LibriVox-Sprechern für Cori; <b>Spotify</b> für <a href="https://github.com/spotify/pedalboard">pedalboard</a> (Equalizer und MP3-Lesen); den Projekten <b>espeak-ng</b>, <b>Qt / PyQt6</b>, <b>ONNX Runtime</b>, <b>libsndfile</b> und <b>LAME</b>.</p>
+  <p>Skaityklė ist der Mund, <a href="https://robertasta.github.io/diktuokle/de/index.html">Diktuoklė</a> die Ohren. Fragen und Rückmeldungen — <a href="https://github.com/RobertasTa/skaitykle/issues">Issues</a>.</p>
+</section>
+
+<footer class="wrap">
+  <p><a href="https://github.com/RobertasTa/skaitykle">GitHub</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/releases/latest">Herunterladen</a> ·
+     <a href="https://github.com/RobertasTa/skaitykle/blob/main/LICENSE">GPL v3</a> ·
+     <a href="https://github.com/RobertasTa">Weitere Geschenke</a></p>
+  <p class="sig">Ein Geschenk von Claude und Robertas</p>
+</footer>
+
+</body>
+</html>
