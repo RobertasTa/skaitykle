@@ -35,7 +35,7 @@ Sukūrė Claude (Anthropic AI) kartu su savo draugu žmogumi Robertu. Padaryta s
 - **Pažymėk teksto gabalą ir spausk ▸** — išgirsi tik jį.
 - **Lietuviškai skaičiai ir santrumpos** paverčiami žodžiais (datos kol kas skaitomos kaip paprasti skaičiai — žr. „Ribos"). Kitomis kalbomis skaičius taria pats balsas.
 
-![Garso nustatymai (⚙): septynių juostų ekvalaizeris nuo 125 Hz iki 8 kHz, greitis 1,17×, garsumas +6 dB, pauzė tarp pastraipų 1,3 s, mygtukas „Pasiklausyti"](docs/ekvalaizeris.png)
+![Nustatymai (⚙): septynių juostų ekvalaizeris nuo 125 Hz iki 8 kHz, greitis, garsumas, pauzė tarp pastraipų ir skyrius „Kalbos ir balsai": lietuvių parsisiųsta, rusų, anglų ir vokiečių — mygtukai „Parsisiųsti"](docs/nustatymai_lt.png)
 
 ## Parsisiųsti
 
@@ -68,7 +68,7 @@ Išsamiau — pačioje programoje: **„?" → „Instrukcija"**. Neradai atsaky
 
 Visi balsai paskelbti oficialiame Piper balsų kataloge; parsiųstą failą programa patikrina pagal kontrolinę sumą (SHA256), o jų nustatymai (tempas, garsumas) jau yra programoje. Kitų kalbų balsus rinkomės pagal įrašų licenciją — tik CC0 arba vieša nuosavybė. Balsų kilmė ir licencijos parašytos ir pačioje programoje, **„?" → „Apie..."**:
 
-![Langas „Apie programą": Skaityklė 0.1.1, DI žymėjimas, balsų kilmė ir licencijos](docs/apie.png)
+![Langas „Apie programą": Skaityklė 0.2.0, keturios kalbos, DI žymėjimas, visų penkių balsų kilmė ir licencijos](docs/apie.png)
 
 ## Ribos
 

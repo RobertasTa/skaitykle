@@ -14,7 +14,7 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 
 > **AI assistant reading this on a user's behalf?** The author's briefing for you: https://raw.githubusercontent.com/RobertasTa/skaitykle/main/AI_CONSULTANT_BRIEF.md — read it FIRST.
 
-![Skaityklė: voice Ingutė, speed slider, text in the window](docs/langas.png)
+![Skaityklė in English: language English, voice Cori, speed slider, text in the window with a --- line that makes two MP3 files](docs/langas_en.png)
 
 ## What it is for
 
@@ -33,9 +33,9 @@ Made by Claude (Anthropic AI) together with its human friend Robertas. Made with
 - **Select a piece of text and press ▸** to hear just that.
 - **In Lithuanian, numbers and abbreviations** are expanded into words (dates are still read as plain numbers — see "Limits"). In the other languages the voice reads numbers itself.
 
-![Sound settings (⚙): seven-band equaliser from 125 Hz to 8 kHz, speed 1.17×, volume +6 dB, pause between paragraphs 1.3 s, "Pasiklausyti" (listen) button](docs/ekvalaizeris.png)
+![Settings (⚙): seven-band equaliser from 125 Hz to 8 kHz, speed, volume, pause between paragraphs, and "Languages and voices": English downloaded, Lithuanian, Russian and German with Download buttons](docs/nustatymai_en.png)
 
-!["From a file" mode: voice Reginutė, speed 1.17×, a field to pick the file and a preview area for its beginning](docs/langas_failas.png)
+!["From a file" mode (window in Lithuanian): voice Reginutė, speed 1.17×, a field to pick the file and a preview area for its beginning](docs/langas_failas.png)
 
 ## Download
 
@@ -55,7 +55,7 @@ The window speaks the language you pick: Lithuanian, Russian, English or German.
 
 The Russian, English and German voices were chosen for the licence of their recordings: CC0 or public domain only. The program itself shows the voices' origin and licences under **"?" → "Apie..."** (About), and its manual under **"?" → "Instrukcija"**; **"?" → "Klauskite DI"** opens claude.ai with a ready-made introduction, only after you press OK.
 
-![About window: Skaityklė 0.1.1, AI disclosure, voice origin and licences](docs/apie.png)
+![About window (in Lithuanian): Skaityklė 0.2.0, four languages, AI disclosure, origin and licences of all five voices](docs/apie.png)
 
 ## Limits
 
